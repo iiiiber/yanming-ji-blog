@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>archive — 雁鸣集</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000000;
+    --panel: #0A0A0A;
+    --panel-2: #111113;
+    --border: #1F1F1F;
+    --border-2: #2A2A2E;
+    --text: #E4E4E7;
+    --muted: #71717A;
+    --comment: #6B7280;
+    --keyword: #7DD3FC;
+    --string: #A7F3D0;
+    --number: #FCA5A5;
+    --function: #C4B5FD;
+    --variable: #FDE68A;
+    --cta: #22D3EE;
+  }
+  html, body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', 'IBM Plex Sans SC', -apple-system, system-ui, sans-serif; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  button, input { font-family: inherit; }
+  code, pre, .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+  ::selection { background: var(--cta); color: #000; }
+
+  header.site-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 28px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .path { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); }
+  .brand .path .p1 { color: var(--muted); }
+  .brand .path .p2 { color: var(--keyword); }
+  .brand .path .p3 { color: var(--string); }
+  .brand .path .cursor { display: inline-block; width: 8px; height: 16px; background: var(--cta); animation: blink 1.1s step-end infinite; vertical-align: middle; margin-left: 4px; }
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  .nav-tabs { display: flex; gap: 0; }
+  .nav-tabs a {
+    padding: 0 16px; height: 56px; display: inline-flex; align-items: center;
+    color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace;
+    border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+  }
+  .nav-tabs a:hover, .nav-tabs a.active { color: var(--text); border-bottom-color: var(--cta); }
+  .nav-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; background: var(--cta); color: #000;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    border-radius: 4px; transition: filter .2s;
+  }
+  .nav-cta:hover { filter: brightness(1.15); }
+
+  .divider {
+    display: flex; align-items: center; gap: 16px; padding: 0 28px;
+    color: var(--comment); font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .divider .line { flex: 1; height: 1px; background: var(--border); }
+  .divider .hash { color: var(--muted); }
+  .divider .title { color: var(--text); font-weight: 500; }
+  .divider .eq { color: var(--muted); }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 28px; }
+
+  /* Archive header */
+  .archive-head { padding: 80px 0 50px; }
+  .archive-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(40px, 6vw, 72px); font-weight: 700;
+    color: var(--text); line-height: 1.1; letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  .archive-title .blk { display: inline-block; width: 0.6em; height: 1em; background: var(--cta); vertical-align: -0.1em; margin-left: 6px; animation: blink 1s step-end infinite; }
+  .archive-subtitle { color: var(--comment); font-size: 16px; max-width: 640px; line-height: 1.7; font-family: 'JetBrains Mono', monospace; }
+  .archive-subtitle::before { content: '// '; color: var(--muted); }
+
+  /* Filter bar (terminal style) */
+  .filter-bar {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    padding: 18px 22px; margin-bottom: 40px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .filter-bar .row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .filter-bar .label { color: var(--comment); }
+  .filter-bar .label::before { content: '$ '; color: var(--string); }
+  .filter-bar .filter-tag {
+    padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 4px;
+    color: var(--muted); cursor: pointer; transition: all .15s;
+  }
+  .filter-bar .filter-tag:hover { color: var(--text); border-color: var(--border-2); }
+  .filter-bar .filter-tag.active { color: var(--cta); border-color: var(--cta); background: rgba(34,211,238,0.05); }
+  .filter-bar .sep { color: var(--border-2); }
+
+  /* Stats line */
+  .stats-line {
+    display: flex; gap: 32px; flex-wrap: wrap;
+    padding: 20px 0; margin-bottom: 32px;
+    border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .stats-line .item .k { color: var(--comment); }
+  .stats-line .item .v { color: var(--number); font-weight: 600; }
+  .stats-line .item .ok { color: var(--string); }
+
+  /* Article list */
+  .article-list { display: flex; flex-direction: column; gap: 12px; }
+  .article-list .row {
+    display: grid; grid-template-columns: 80px 1fr 200px 100px;
+    gap: 20px; align-items: center; padding: 18px 22px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    transition: border-color .2s, transform .2s;
+  }
+  .article-list .row:hover { border-color: var(--border-2); transform: translateX(2px); }
+  .article-list .row .ln { font-family: 'JetBrains Mono', monospace; color: var(--comment); font-size: 12px; }
+  .article-list .row .title-cell h3 { font-size: 17px; color: var(--text); font-weight: 500; margin-bottom: 4px; }
+  .article-list .row .title-cell .tag {
+    display: inline-block; padding: 2px 6px; border: 1px solid var(--border-2); border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-right: 6px;
+  }
+  .article-list .row .title-cell .excerpt { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 4px; }
+  .article-list .row .date {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .article-list .row .date::before { content: '📅 '; }
+  .article-list .row .read {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--function);
+    text-align: right;
+  }
+  .article-list .row .read::after { content: ' read'; color: var(--comment); margin-left: 4px; }
+
+  /* Pagination */
+  .pager { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding: 24px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .pager .pager-btn { padding: 8px 16px; border: 1px solid var(--border-2); border-radius: 4px; color: var(--text); transition: border-color .2s, color .2s; }
+  .pager .pager-btn:hover { border-color: var(--cta); color: var(--cta); }
+  .pager .pager-btn.disabled { color: var(--muted); pointer-events: none; }
+  .pager .pager-info { color: var(--comment); }
+  .pager .pager-info .v { color: var(--function); }
+
+  /* Footer */
+  footer { background: var(--panel); border-top: 1px solid var(--border); padding: 60px 0 30px; margin-top: 80px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; max-width: 1200px; margin: 0 auto 40px; padding: 0 28px; }
+  .footer-brand h4 { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--text); margin-bottom: 12px; }
+  .footer-brand h4::before { content: '$ '; color: var(--string); }
+  .footer-brand p { color: var(--muted); font-size: 14px; max-width: 360px; line-height: 1.6; }
+  .footer-col h5 { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--cta); margin-bottom: 14px; }
+  .footer-col h5::before { content: '## '; color: var(--muted); }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .footer-col a { color: var(--muted); transition: color .2s; }
+  .footer-col a:hover { color: var(--text); }
+  .footer-col a::before { content: '→ '; color: var(--border-2); }
+  .footer-bottom { padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; color: var(--comment); font-family: 'JetBrains Mono', monospace; font-size: 12px; max-width: 1200px; margin: 0 auto; padding-left: 28px; padding-right: 28px; }
+
+  @media (max-width: 900px) {
+    .nav-tabs { display: none; }
+    .article-list .row { grid-template-columns: 60px 1fr; gap: 12px; }
+    .article-list .row .date, .article-list .row .read { grid-column: 2; }
+    .article-list .row .read { text-align: left; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a href="./index.html" class="brand">
+        <span class="path mono"><span class="p1">~</span>/<span class="p2">writing</span>/<span class="p3">yan-ming-ji</span><span class="cursor"></span></span>
+      </a>
+      <nav class="nav-tabs">
+        <a href="./index.html">./issue-042</a>
+        <a href="./archive.html" class="active">./archive</a>
+        <a href="./index.html#author">./author</a>
+        <a href="./index.html#about">./about</a>
+        <a href="./index.html#rss">./rss</a>
+      </nav>
+      <a href="./index.html#subscribe" class="nav-cta">$ ./subscribe</a>
+    </div>
+  </header>
+
+  <div class="divider"><span class="hash">#</span><span class="eq">============</span><span class="title">archive · all articles</span><span class="eq">============</span><span class="hash">#</span></div>
+
+  <main>
+    <div class="wrap">
+      <section class="archive-head">
+        <h1 class="archive-title">ls -la ./archive/<span class="blk"></span></h1>
+        <p class="archive-subtitle">所有文章，按发布时间倒序。可以按分类筛选，点行进文章。</p>
+      </section>
+
+      <div class="filter-bar">
+        <div class="row">
+          <span class="label">grep --tag</span>
+          <a href="#" class="filter-tag active">[all]</a>
+          <a href="#" class="filter-tag">[cover-story]</a>
+          <a href="#" class="filter-tag">[tech]</a>
+          <a href="#" class="filter-tag">[essay]</a>
+          <a href="#" class="filter-tag">[lifestyle]</a>
+          <a href="#" class="filter-tag">[tools]</a>
+          <a href="#" class="filter-tag">[review]</a>
+        </div>
+      </div>
+
+      <div class="stats-line">
+        <div class="item"><span class="k">total:</span> <span class="v">147</span></div>
+        <div class="item"><span class="k">this_year:</span> <span class="v">42</span></div>
+        <div class="item"><span class="k">avg_read:</span> <span class="v">8.3 min</span></div>
+        <div class="item"><span class="k">status:</span> <span class="ok">OK</span></div>
+      </div>
+
+      <div class="article-list">
+        <a href="./article.html" class="row">
+          <span class="ln">001.</span>
+          <div class="title-cell">
+            <h3>AI 不会取代作家，但会改变"写作"本身</h3>
+            <div><span class="tag">cover-story</span></div>
+            <p class="excerpt">从 2023 年开始用大模型辅助写作，到今天我已经很难讲清楚哪些句子是"我写的"...</p>
+          </div>
+          <span class="date">2026-06-02</span>
+          <span class="read">14 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">002.</span>
+          <div class="title-cell">
+            <h3>从 Vim 到 Neovim：一次完整的迁移记录</h3>
+            <div><span class="tag">tech</span></div>
+            <p class="excerpt">配置、插件、LSP、性能优化，以及那些我以为会很难、结果只是改了一行配置的事...</p>
+          </div>
+          <span class="date">2026-05-31</span>
+          <span class="read">11 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">003.</span>
+          <div class="title-cell">
+            <h3>住进山里第十个月：我学到了什么</h3>
+            <div><span class="tag">essay</span></div>
+            <p class="excerpt">从北京五道口到浙东一个 200 人的村子，关于注意力、孤独、柴火和邻居的猫...</p>
+          </div>
+          <span class="date">2026-05-25</span>
+          <span class="read">9 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">004.</span>
+          <div class="title-cell">
+            <h3>Rust 入门三周记：一个 Python 程序的视角</h3>
+            <div><span class="tag">tech</span></div>
+            <p class="excerpt">所有权、借用、生命周期——这些概念为什么对，以及为什么 Python 程序员反而更容易学...</p>
+          </div>
+          <span class="date">2026-06-04</span>
+          <span class="read">8 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">005.</span>
+          <div class="title-cell">
+            <h3>我关掉了所有推送，世界没有塌</h3>
+            <div><span class="tag">lifestyle</span></div>
+            <p class="excerpt">一个月的通知戒断报告：哪些事情我以为会错过，哪些事情我真的错过了...</p>
+          </div>
+          <span class="date">2026-05-28</span>
+          <span class="read">5 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">006.</span>
+          <div class="title-cell">
+            <h3>Obsidian 双链笔记两年后：我的 P.A.R.A 重构</h3>
+            <div><span class="tag">tools</span></div>
+            <p class="excerpt">1500 篇笔记、3 次大重构、1 个我终于不再打开的插件。讲讲一个普通人的笔记系统演进...</p>
+          </div>
+          <span class="date">2026-05-21</span>
+          <span class="read">12 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">007.</span>
+          <div class="title-cell">
+            <h3>《思考，快与慢》重读笔记：五段让我重新理解决策的引文</h3>
+            <div><span class="tag">review</span></div>
+            <p class="excerpt">三年前读过的书，重新翻开，比我以为的更实用。卡尼曼讲"系统 1"那段话改变了我对直觉的信任...</p>
+          </div>
+          <span class="date">2026-05-15</span>
+          <span class="read">7 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">008.</span>
+          <div class="title-cell">
+            <h3>为什么我把工作日历改成了纸质本</h3>
+            <div><span class="tag">essay</span></div>
+            <p class="excerpt">从 4 年的 Notion 切换回纸笔，关于"信息在我手边"和"信息在我脑子里"的区别...</p>
+          </div>
+          <span class="date">2026-05-08</span>
+          <span class="read">6 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">009.</span>
+          <div class="title-cell">
+            <h3>用 SQLite 当博客后端：一个反主流的小实验</h3>
+            <div><span class="tag">tech</span></div>
+            <p class="excerpt">不要 PostgreSQL、不要 MongoDB、连 MySQL 都不要。一个文件、一行命令搞定，还能版本控制...</p>
+          </div>
+          <span class="date">2026-04-30</span>
+          <span class="read">10 min</span>
+        </a>
+
+        <a href="./article.html" class="row">
+          <span class="ln">010.</span>
+          <div class="title-cell">
+            <h3>关于"深度工作"的 100 天实践报告</h3>
+            <div><span class="tag">lifestyle</span></div>
+            <p class="excerpt">每天 4 小时无干扰写作/编程，100 天后的变化：产出的"质量"变了，生活的"质感"也变了...</p>
+          </div>
+          <span class="date">2026-04-22</span>
+          <span class="read">13 min</span>
+        </a>
+      </div>
+
+      <div class="pager">
+        <a href="#" class="pager-btn disabled">← ./prev</a>
+        <span class="pager-info">page <span class="v">1</span> / <span class="v">15</span> · showing 10 of 147</span>
+        <a href="#" class="pager-btn">./next →</a>
+      </div>
+    </div>
+  </main>
+
+  <div class="divider"><span class="hash">#</span><span class="eq">============</span><span class="title">end of file</span><span class="eq">============</span><span class="hash">#</span></div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h4>echo "雁鸣集"</h4>
+        <p>一封每周三到的邮件，写给想慢下来的人。订阅完全免费，随时可以退订。</p>
+      </div>
+      <div class="footer-col">
+        <h5>navigation</h5>
+        <ul>
+          <li><a href="./index.html">./issue-042</a></li>
+          <li><a href="./archive.html">./archive</a></li>
+          <li><a href="./index.html#rss">./rss</a></li>
+          <li><a href="./index.html#about">./about</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>contact</h5>
+        <ul>
+          <li><a href="./index.html#subscribe">./subscribe</a></li>
+          <li><a href="#">./twitter</a></li>
+          <li><a href="#">./github</a></li>
+          <li><a href="#">./submit</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>// © 2026 雁鸣集 — built with vim &amp; patience</span>
+      <span>EOF</span>
+    </div>
+  </footer>
+</body>
+</html>

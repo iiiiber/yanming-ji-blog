@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 不会取代作家，但会改变"写作"本身 — 雁鸣集</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Sans+SC:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000000;
+    --panel: #0A0A0A;
+    --panel-2: #111113;
+    --border: #1F1F1F;
+    --border-2: #2A2A2E;
+    --text: #E4E4E7;
+    --muted: #71717A;
+    --comment: #6B7280;
+    --keyword: #7DD3FC;
+    --string: #A7F3D0;
+    --number: #FCA5A5;
+    --function: #C4B5FD;
+    --variable: #FDE68A;
+    --cta: #22D3EE;
+  }
+  html, body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', 'IBM Plex Sans SC', -apple-system, system-ui, sans-serif; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  button, input { font-family: inherit; }
+  code, pre, .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+  ::selection { background: var(--cta); color: #000; }
+
+  /* Nav (shared) */
+  header.site-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 28px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .path { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); }
+  .brand .path .p1 { color: var(--muted); }
+  .brand .path .p2 { color: var(--keyword); }
+  .brand .path .p3 { color: var(--string); }
+  .brand .path .cursor { display: inline-block; width: 8px; height: 16px; background: var(--cta); animation: blink 1.1s step-end infinite; vertical-align: middle; margin-left: 4px; }
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  .nav-tabs { display: flex; gap: 0; }
+  .nav-tabs a {
+    padding: 0 16px; height: 56px; display: inline-flex; align-items: center;
+    color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace;
+    border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+  }
+  .nav-tabs a:hover, .nav-tabs a.active { color: var(--text); border-bottom-color: var(--cta); }
+  .nav-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; background: var(--cta); color: #000;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    border-radius: 4px; transition: filter .2s;
+  }
+  .nav-cta:hover { filter: brightness(1.15); }
+
+  .divider {
+    display: flex; align-items: center; gap: 16px; padding: 0 28px;
+    color: var(--comment); font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .divider .line { flex: 1; height: 1px; background: var(--border); }
+  .divider .hash { color: var(--muted); }
+  .divider .title { color: var(--text); font-weight: 500; }
+  .divider .eq { color: var(--muted); }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 28px; }
+
+  /* Article header */
+  .article-header { padding: 60px 0 40px; }
+  .breadcrumb { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--comment); margin-bottom: 32px; }
+  .breadcrumb a { color: var(--muted); }
+  .breadcrumb a:hover { color: var(--cta); }
+  .breadcrumb .sep { color: var(--border-2); margin: 0 8px; }
+  .article-tag {
+    display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--cta); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;
+  }
+  .article-tag::before { content: '['; color: var(--muted); }
+  .article-tag::after { content: ']'; color: var(--muted); }
+  .article-title {
+    font-family: 'IBM Plex Serif', 'IBM Plex Sans SC', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.2; font-weight: 600; color: var(--text);
+    margin-bottom: 24px; letter-spacing: -0.01em;
+  }
+  .article-meta {
+    display: flex; flex-wrap: wrap; gap: 24px; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted);
+    padding: 18px 0; border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border);
+  }
+  .article-meta .k { color: var(--comment); }
+  .article-meta .v { color: var(--function); }
+  .article-meta .author-avatar {
+    width: 28px; height: 28px; border-radius: 4px; background: var(--panel-2);
+    border: 1px solid var(--border-2); display: inline-grid; place-items: center;
+    color: var(--keyword); font-size: 12px; font-weight: 600;
+  }
+
+  /* Article body */
+  .article-body {
+    padding: 50px 0 80px;
+    font-family: 'IBM Plex Serif', 'IBM Plex Sans SC', serif;
+    font-size: 18px; line-height: 1.85; color: var(--text);
+  }
+  .article-body p { margin-bottom: 28px; }
+  .article-body h2 {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 28px; font-weight: 600; color: var(--text);
+    margin-top: 56px; margin-bottom: 24px; letter-spacing: -0.01em;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .article-body h2::before { content: '## '; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 22px; }
+  .article-body h3 {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 22px; font-weight: 600; color: var(--text);
+    margin-top: 40px; margin-bottom: 18px;
+  }
+  .article-body h3::before { content: '### '; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 18px; }
+  .article-body ul, .article-body ol { margin: 0 0 28px 24px; }
+  .article-body li { margin-bottom: 10px; }
+  .article-body blockquote {
+    border-left: 3px solid var(--cta);
+    padding: 8px 0 8px 20px; margin: 28px 0;
+    color: var(--muted); font-style: italic;
+  }
+  .article-body blockquote::before { content: '> '; color: var(--cta); font-style: normal; font-family: 'JetBrains Mono', monospace; }
+  .article-body strong { color: var(--text); font-weight: 600; }
+  .article-body em { color: var(--function); font-style: italic; }
+  .article-body a { color: var(--cta); border-bottom: 1px dashed var(--cta); }
+  .article-body a:hover { color: var(--text); border-bottom-color: var(--text); }
+  .article-body code:not(pre code) {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.88em;
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 2px 6px; border-radius: 3px; color: var(--string);
+  }
+
+  /* Code block (IDE style with line numbers) */
+  .code-block {
+    margin: 32px 0; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+  }
+  .code-block .code-header {
+    display: flex; align-items: center; gap: 10px; padding: 10px 18px;
+    background: var(--panel-2); border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .code-block .code-header .dots { display: flex; gap: 6px; }
+  .code-block .code-header .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--border-2); }
+  .code-block .code-header .dots span:nth-child(1) { background: #FCA5A5; }
+  .code-block .code-header .dots span:nth-child(2) { background: #FDE68A; }
+  .code-block .code-header .dots span:nth-child(3) { background: #A7F3D0; }
+  .code-block .code-header .filename { color: var(--text); }
+  .code-block .code-header .lang { margin-left: auto; color: var(--comment); }
+  .code-block pre {
+    margin: 0; padding: 18px 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7;
+    color: var(--text); overflow-x: auto;
+  }
+  .code-block pre code { display: block; }
+  .code-block .line {
+    display: flex; padding: 0 18px;
+  }
+  .code-block .line:hover { background: rgba(255,255,255,0.02); }
+  .code-block .line .ln {
+    flex: 0 0 40px; color: var(--comment); user-select: none; text-align: right;
+    padding-right: 16px;
+  }
+  .code-block .line .code { flex: 1; white-space: pre; }
+
+  /* Syntax tokens (lightweight highlighter) */
+  .tok-kw { color: var(--keyword); }
+  .tok-str { color: var(--string); }
+  .tok-num { color: var(--number); }
+  .tok-fn { color: var(--function); }
+  .tok-var { color: var(--variable); }
+  .tok-com { color: var(--comment); font-style: italic; }
+  .tok-pun { color: var(--muted); }
+
+  /* Article footer */
+  .article-footer { padding: 40px 0 100px; border-top: 1px solid var(--border); margin-top: 40px; }
+  .article-footer .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+  .article-footer .tag-row a {
+    padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .article-footer .tag-row a:hover { color: var(--cta); border-color: var(--cta); }
+  .article-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .article-nav .nav-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    padding: 22px; transition: border-color .2s, transform .2s; display: block;
+  }
+  .article-nav .nav-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+  .article-nav .nav-card .label { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--comment); margin-bottom: 8px; }
+  .article-nav .nav-card .label::before { content: '$ '; color: var(--string); }
+  .article-nav .nav-card.next { text-align: right; }
+  .article-nav .nav-card .label.next::before { content: ''; }
+  .article-nav .nav-card .label.next::after { content: ' $'; color: var(--string); }
+  .article-nav .nav-card h4 { font-size: 16px; color: var(--text); font-weight: 600; }
+
+  /* Footer */
+  footer { background: var(--panel); border-top: 1px solid var(--border); padding: 60px 0 30px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; max-width: 1200px; margin: 0 auto 40px; padding: 0 28px; }
+  .footer-brand h4 { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--text); margin-bottom: 12px; }
+  .footer-brand h4::before { content: '$ '; color: var(--string); }
+  .footer-brand p { color: var(--muted); font-size: 14px; max-width: 360px; line-height: 1.6; }
+  .footer-col h5 { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--cta); margin-bottom: 14px; }
+  .footer-col h5::before { content: '## '; color: var(--muted); }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .footer-col a { color: var(--muted); transition: color .2s; }
+  .footer-col a:hover { color: var(--text); }
+  .footer-col a::before { content: '→ '; color: var(--border-2); }
+  .footer-bottom { padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; color: var(--comment); font-family: 'JetBrains Mono', monospace; font-size: 12px; max-width: 1200px; margin: 0 auto; padding-left: 28px; padding-right: 28px; }
+
+  @media (max-width: 900px) {
+    .nav-tabs { display: none; }
+    .article-nav { grid-template-columns: 1fr; }
+    .article-nav .nav-card.next { text-align: left; }
+    .article-nav .nav-card .label.next::before { content: '$ '; }
+    .article-nav .nav-card .label.next::after { content: ''; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .article-body { font-size: 16px; }
+    .article-title { font-size: 28px; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a href="./index.html" class="brand">
+        <span class="path mono"><span class="p1">~</span>/<span class="p2">writing</span>/<span class="p3">yan-ming-ji</span><span class="cursor"></span></span>
+      </a>
+      <nav class="nav-tabs">
+        <a href="./index.html">./issue-042</a>
+        <a href="./archive.html">./archive</a>
+        <a href="./index.html#author">./author</a>
+        <a href="./index.html#about">./about</a>
+        <a href="./index.html#rss">./rss</a>
+      </nav>
+      <a href="./index.html#subscribe" class="nav-cta">$ ./subscribe</a>
+    </div>
+  </header>
+
+  <div class="divider"><span class="hash">#</span><span class="eq">============</span><span class="title">article</span><span class="eq">============</span><span class="hash">#</span></div>
+
+  <main>
+    <div class="wrap">
+      <article>
+        <header class="article-header">
+          <div class="breadcrumb">
+            <a href="./index.html">~</a><span class="sep">/</span>
+            <a href="./archive.html">writing</a><span class="sep">/</span>
+            <span>article-01.md</span>
+          </div>
+          <span class="article-tag">cover story</span>
+          <h1 class="article-title">AI 不会取代作家，但会改变"写作"本身</h1>
+          <div class="article-meta">
+            <span class="author-avatar">夜</span>
+            <div><span class="k">author:</span> <span class="v">夜鸣</span></div>
+            <div><span class="k">date:</span> <span class="v">2026-06-02</span></div>
+            <div><span class="k">read:</span> <span class="v">14min</span></div>
+            <div><span class="k">words:</span> <span class="v">3,847</span></div>
+            <div><span class="k">commits:</span> <span class="v">7</span></div>
+          </div>
+        </header>
+
+        <div class="article-body">
+          <p>从 2023 年开始用大模型辅助写作，到今天我已经很难讲清楚哪些句子是"我写的"。这篇文章记录了我重新理解"作者"这个身份的过程——从对工具的警惕，到把工具当作另一种语言，最后承认它已经在重塑我思考的方式。</p>
+
+          <p>这是一个关于"协作"的故事，不是关于"取代"的。</p>
+
+          <h2>第一阶段：警惕（2023 春）</h2>
+          <p>我第一次让 GPT 帮我润色一段话，是 2023 年 3 月。那段话讲的是我对远程工作的看法。模型给出的版本比我写的更"通顺"，结构更清晰，但我看着它就感觉别扭——不是错，是它读起来不像我。</p>
+          <blockquote>写作者的本能是辨认自己的声音。当那个声音消失时，你会立刻察觉。</blockquote>
+          <p>那段时间我几乎不用 AI 写东西。我对它的态度是：<strong>它是替身，不是工具</strong>。一个写作者用替身写出来的东西，无论多好，都是赝品。</p>
+
+          <p>我甚至把 LLM 从我的工作流里删了几个月。</p>
+
+          <h2>第二阶段：把它当成另一种语言</h2>
+          <p>转折点发生在一次写技术文档。我卡在一段关于"如何在 Kubernetes 里配置健康检查"的描述上，反反复复改了 5 遍都不满意。我让 Claude 试试看——它给的版本我几乎直接用了，只改了 2 个词。</p>
+          <p>那一刻我意识到：<em>我不是在用它"写"，我是在用它"翻译"</em>。我脑子里有想法，但有些想法的"原始形式"是模糊的、碎片化的，而 LLM 能帮我把这些碎片整理成清晰的句子。</p>
+          <p>这不是"替身"在工作，这是"翻译软件"在工作。</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">writing-pipeline.sh</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-com"># 我的写作流水线：不是"用 AI 写"，是"用 AI 整理"</span></span></span><span class="line"><span class="ln">2</span><span class="code"></span></span><span class="line"><span class="ln">3</span><span class="code"><span class="tok-kw">function</span> <span class="tok-fn">draft</span>() {</span></span><span class="line"><span class="ln">4</span><span class="code">    <span class="tok-com"># 第一步：我手写一份"原始草稿"——逻辑乱、句子破、错字多</span></span></span><span class="line"><span class="ln">5</span><span class="code">    <span class="tok-kw">local</span> raw=<span class="tok-pun">$(</span>cat ./drafts/<span class="tok-var">$1</span>.md<span class="tok-pun">)</span></span></span><span class="line"><span class="ln">6</span><span class="code"></span></span><span class="line"><span class="ln">7</span><span class="code">    <span class="tok-com"># 第二步：让 LLM 整理成结构化的初稿</span></span></span><span class="line"><span class="ln">8</span><span class="code">    <span class="tok-kw">local</span> refined=<span class="tok-pun">$(</span>llm_clean <span class="tok-str">"整理成通顺的中文，保留我的观点"</span> <span class="tok-pun">&lt;&lt;&lt;</span> <span class="tok-str">"<span class="tok-var">$raw</span>"</span><span class="tok-pun">)</span></span></span><span class="line"><span class="ln">9</span><span class="code"></span></span><span class="line"><span class="ln">10</span><span class="code">    <span class="tok-com"># 第三步：我再改一遍——加细节、调语气、删废话</span></span></span><span class="line"><span class="ln">11</span><span class="code">    <span class="tok-fn">echo</span> <span class="tok-str">"<span class="tok-var">$refined</span>"</span> | vim -</span></span><span class="line"><span class="ln">12</span><span class="code">}</span></span></code></pre>
+          </div>
+
+          <h2>第三阶段：承认它已经在重塑我</h2>
+          <p>用了大模型两年后，我开始注意到一些变化：</p>
+          <ul>
+            <li>我写东西时会**先想"这个观点能否被 LLM 准确转述"**——不是为了让 AI 理解，是这个习惯在重塑我的表达方式</li>
+            <li>我开始用**结构化的小标题**——因为我知道 LLM 不会乱</li>
+            <li>我减少了**复杂的从句和长句**——因为我意识到它们是"低信号"</li>
+          </ul>
+          <p>这些都是 LLM 带来的**写作习惯的变化**。无论我用不用它来"写"，它已经改变了"写"这件事本身。</p>
+
+          <h2>那么，"作家"还在吗？</h2>
+          <p>还在。但它变了。</p>
+          <p>以前的作家是"写句子的人"——他们的手艺是字、词、句、段的排列。现在的作家更像是"决定写什么、用什么语气、为谁写的人"——<strong>手艺从"语言"转移到了"判断"</strong>。</p>
+          <p>我以前会为一组词纠结半天。现在我更纠结的是：这段话我**要不要**说？对谁说？用什么样的"声音"说？</p>
+          <p>这个变化让我觉得：</p>
+          <blockquote>工具没有取代作者。工具让作者从"工人"变成了"导演"——你不再亲自写每个镜头，但你得决定整个故事是什么。</blockquote>
+
+          <h2>如果你是写作者</h2>
+          <p>我的建议只有一条：</p>
+          <p><strong>别把 LLM 看成"代笔的"，把它看成"外置的语法系统"</strong>。就像你用拼写检查不会觉得文章是 CheckSpell 写的一样，你用 LLM 整理草稿，文章还是你写的——只是少了一部分"机械劳动"。</p>
+          <p>真正的写作——决定写什么、为什么写、用什么情感写——这件事 LLM 做不了。能做这件事的，还是你。</p>
+
+          <p>至少，目前是这样。</p>
+        </div>
+
+        <footer class="article-footer">
+          <div class="tag-row">
+            <a href="#">#AI</a>
+            <a href="#">#写作</a>
+            <a href="#">#工具</a>
+            <a href="#">#思考</a>
+            <a href="#">#cover-story</a>
+          </div>
+          <div class="article-nav">
+            <a href="./article.html" class="nav-card prev">
+              <div class="label">cd ../previous</div>
+              <h4>← 住进山里第十个月：我学到了什么</h4>
+            </a>
+            <a href="./article.html" class="nav-card next">
+              <div class="label next">cd ../next</div>
+              <h4>从 Vim 到 Neovim：一次完整的迁移记录 →</h4>
+            </a>
+          </div>
+        </footer>
+      </article>
+    </div>
+  </main>
+
+  <div class="divider"><span class="hash">#</span><span class="eq">============</span><span class="title">end of file</span><span class="eq">============</span><span class="hash">#</span></div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h4>echo "雁鸣集"</h4>
+        <p>一封每周三到的邮件，写给想慢下来的人。订阅完全免费，随时可以退订。</p>
+      </div>
+      <div class="footer-col">
+        <h5>navigation</h5>
+        <ul>
+          <li><a href="./index.html">./issue-042</a></li>
+          <li><a href="./archive.html">./archive</a></li>
+          <li><a href="./index.html#rss">./rss</a></li>
+          <li><a href="./index.html#about">./about</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>contact</h5>
+        <ul>
+          <li><a href="./index.html#subscribe">./subscribe</a></li>
+          <li><a href="#">./twitter</a></li>
+          <li><a href="#">./github</a></li>
+          <li><a href="#">./submit</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>// © 2026 雁鸣集 — built with vim &amp; patience</span>
+      <span>EOF</span>
+    </div>
+  </footer>
+</body>
+</html>
