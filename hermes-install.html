@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻 — 雁鸣集</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Sans+SC:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000000; --panel: #0A0A0A; --panel-2: #111113;
+    --border: #1F1F1F; --border-2: #2A2A2E;
+    --text: #E4E4E7; --muted: #71717A; --comment: #6B7280;
+    --keyword: #7DD3FC; --string: #A7F3D0; --number: #FCA5A5;
+    --function: #C4B5FD; --variable: #FDE68A; --cta: #22D3EE;
+  }
+  html, body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', 'IBM Plex Sans SC', -apple-system, system-ui, sans-serif; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  button, input { font-family: inherit; }
+  code, pre, .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+  ::selection { background: var(--cta); color: #000; }
+
+  header.site-nav { position: sticky; top: 0; z-index: 50; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 28px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .path { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); }
+  .brand .path .p1 { color: var(--muted); } .brand .path .p2 { color: var(--keyword); } .brand .path .p3 { color: var(--string); }
+  .brand .path .cursor { display: inline-block; width: 8px; height: 16px; background: var(--cta); animation: blink 1.1s step-end infinite; vertical-align: middle; margin-left: 4px; }
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  .nav-tabs { display: flex; gap: 0; }
+  .nav-tabs a { padding: 0 16px; height: 56px; display: inline-flex; align-items: center; color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+  .nav-tabs a:hover, .nav-tabs a.active { color: var(--text); border-bottom-color: var(--cta); }
+  .nav-cta { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--cta); color: #000; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; border-radius: 4px; transition: filter .2s; }
+  .nav-cta:hover { filter: brightness(1.15); }
+
+  .divider { display: flex; align-items: center; gap: 16px; padding: 0 28px; color: var(--comment); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .divider .line { flex: 1; height: 1px; background: var(--border); }
+  .divider .hash { color: var(--muted); } .divider .title { color: var(--text); font-weight: 500; } .divider .eq { color: var(--muted); }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 28px; }
+
+  .article-header { padding: 60px 0 40px; }
+  .breadcrumb { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--comment); margin-bottom: 32px; }
+  .breadcrumb a { color: var(--muted); } .breadcrumb a:hover { color: var(--cta); }
+  .breadcrumb .sep { color: var(--border-2); margin: 0 8px; }
+  .article-tag { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--cta); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; }
+  .article-tag::before { content: '['; color: var(--muted); } .article-tag::after { content: ']'; color: var(--muted); }
+  .article-title { font-family: 'IBM Plex Serif', 'IBM Plex Sans SC', serif; font-size: clamp(32px, 5vw, 52px); line-height: 1.2; font-weight: 600; color: var(--text); margin-bottom: 24px; letter-spacing: -0.01em; }
+  .article-meta { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); padding: 18px 0; border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border); }
+  .article-meta .k { color: var(--comment); } .article-meta .v { color: var(--function); }
+  .article-meta .author-avatar { width: 28px; height: 28px; border-radius: 4px; background: var(--panel-2); border: 1px solid var(--border-2); display: inline-grid; place-items: center; color: var(--keyword); font-size: 12px; font-weight: 600; }
+
+  .article-body { padding: 50px 0 80px; font-family: 'IBM Plex Serif', 'IBM Plex Sans SC', serif; font-size: 18px; line-height: 1.85; color: var(--text); }
+  .article-body p { margin-bottom: 28px; }
+  .article-body h2 { font-family: 'IBM Plex Serif', serif; font-size: 28px; font-weight: 600; color: var(--text); margin-top: 56px; margin-bottom: 24px; letter-spacing: -0.01em; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .article-body h2::before { content: '## '; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 22px; }
+  .article-body h3 { font-family: 'IBM Plex Serif', serif; font-size: 22px; font-weight: 600; color: var(--text); margin-top: 40px; margin-bottom: 18px; }
+  .article-body h3::before { content: '### '; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 18px; }
+  .article-body ul, .article-body ol { margin: 0 0 28px 24px; }
+  .article-body li { margin-bottom: 10px; }
+  .article-body blockquote { border-left: 3px solid var(--cta); padding: 8px 0 8px 20px; margin: 28px 0; color: var(--muted); font-style: italic; }
+  .article-body blockquote::before { content: '> '; color: var(--cta); font-style: normal; font-family: 'JetBrains Mono', monospace; }
+  .article-body strong { color: var(--text); font-weight: 600; }
+  .article-body em { color: var(--function); font-style: italic; }
+  .article-body a { color: var(--cta); border-bottom: 1px dashed var(--cta); }
+  .article-body a:hover { color: var(--text); border-bottom-color: var(--text); }
+  .article-body code:not(pre code) { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; background: var(--panel); border: 1px solid var(--border); padding: 2px 6px; border-radius: 3px; color: var(--string); }
+
+  .code-block { margin: 32px 0; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .code-block .code-header { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: var(--panel-2); border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  .code-block .code-header .dots { display: flex; gap: 6px; }
+  .code-block .code-header .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--border-2); }
+  .code-block .code-header .dots span:nth-child(1) { background: #FCA5A5; } .code-block .code-header .dots span:nth-child(2) { background: #FDE68A; } .code-block .code-header .dots span:nth-child(3) { background: #A7F3D0; }
+  .code-block .code-header .filename { color: var(--text); } .code-block .code-header .lang { margin-left: auto; color: var(--comment); }
+  .code-block pre { margin: 0; padding: 18px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7; color: var(--text); overflow-x: auto; }
+  .code-block pre code { display: block; }
+  .code-block .line { display: flex; padding: 0 18px; }
+  .code-block .line:hover { background: rgba(255,255,255,0.02); }
+  .code-block .line .ln { flex: 0 0 40px; color: var(--comment); user-select: none; text-align: right; padding-right: 16px; }
+  .code-block .line .code { flex: 1; white-space: pre; }
+  .tok-kw { color: var(--keyword); } .tok-str { color: var(--string); } .tok-num { color: var(--number); }
+  .tok-fn { color: var(--function); } .tok-var { color: var(--variable); } .tok-com { color: var(--comment); font-style: italic; } .tok-pun { color: var(--muted); }
+
+  .callout { margin: 32px 0; padding: 18px 22px; background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--cta); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; color: var(--muted); }
+  .callout .head { color: var(--cta); font-weight: 600; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .callout .head::before { content: '! '; color: var(--cta); }
+  .callout.warn { border-left-color: var(--number); } .callout.warn .head { color: var(--number); }
+  .callout.warn .head::before { content: '⚠ '; }
+
+  .article-footer { padding: 40px 0 100px; border-top: 1px solid var(--border); margin-top: 40px; }
+  .article-footer .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+  .article-footer .tag-row a { padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  .article-footer .tag-row a:hover { color: var(--cta); border-color: var(--cta); }
+  .article-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .article-nav .nav-card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 22px; transition: border-color .2s, transform .2s; display: block; }
+  .article-nav .nav-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+  .article-nav .nav-card .label { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--comment); margin-bottom: 8px; }
+  .article-nav .nav-card .label::before { content: '$ '; color: var(--string); }
+  .article-nav .nav-card.next { text-align: right; }
+  .article-nav .nav-card .label.next::before { content: ''; } .article-nav .nav-card .label.next::after { content: ' $'; color: var(--string); }
+  .article-nav .nav-card h4 { font-size: 16px; color: var(--text); font-weight: 600; }
+
+  footer { background: var(--panel); border-top: 1px solid var(--border); padding: 60px 0 30px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; max-width: 1200px; margin: 0 auto 40px; padding: 0 28px; }
+  .footer-brand h4 { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--text); margin-bottom: 12px; }
+  .footer-brand h4::before { content: '$ '; color: var(--string); }
+  .footer-brand p { color: var(--muted); font-size: 14px; max-width: 360px; line-height: 1.6; }
+  .footer-col h5 { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--cta); margin-bottom: 14px; }
+  .footer-col h5::before { content: '## '; color: var(--muted); }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .footer-col a { color: var(--muted); transition: color .2s; }
+  .footer-col a:hover { color: var(--text); }
+  .footer-col a::before { content: '→ '; color: var(--border-2); }
+  .footer-bottom { padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; color: var(--comment); font-family: 'JetBrains Mono', monospace; font-size: 12px; max-width: 1200px; margin: 0 auto; padding-left: 28px; padding-right: 28px; }
+
+  @media (max-width: 900px) {
+    .nav-tabs { display: none; }
+    .article-nav { grid-template-columns: 1fr; }
+    .article-nav .nav-card.next { text-align: left; }
+    .article-nav .nav-card .label.next::before { content: '$ '; } .article-nav .nav-card .label.next::after { content: ''; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .article-body { font-size: 16px; } .article-title { font-size: 28px; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a href="./index.html" class="brand">
+        <span class="path mono"><span class="p1">~</span>/<span class="p2">writing</span>/<span class="p3">yan-ming-ji</span><span class="cursor"></span></span>
+      </a>
+      <nav class="nav-tabs">
+        <a href="./index.html">./issue-042</a>
+        <a href="./archive.html">./archive</a>
+        <a href="./index.html#author">./author</a>
+        <a href="./index.html#about">./about</a>
+        <a href="./index.html#rss">./rss</a>
+      </nav>
+      <a href="./index.html#subscribe" class="nav-cta">$ ./subscribe</a>
+    </div>
+  </header>
+
+  <div class="divider"><span class="hash">#</span><span class="eq">============</span><span class="title">article</span><span class="eq">============</span><span class="hash">#</span></div>
+
+  <main>
+    <div class="wrap">
+      <article>
+        <header class="article-header">
+          <div class="breadcrumb">
+            <a href="./index.html">~</a><span class="sep">/</span>
+            <a href="./archive.html">writing</a><span class="sep">/</span>
+            <span>hermes-install-guide.md</span>
+          </div>
+          <span class="article-tag">tech</span>
+          <h1 class="article-title">Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h1>
+          <div class="article-meta">
+            <span class="author-avatar">夜</span>
+            <div><span class="k">author:</span> <span class="v">夜鸣</span></div>
+            <div><span class="k">date:</span> <span class="v">2026-06-11</span></div>
+            <div><span class="k">read:</span> <span class="v">12min</span></div>
+            <div><span class="k">words:</span> <span class="v">3,215</span></div>
+            <div><span class="k">platforms:</span> <span class="v">linux / mac / wsl2 / termux</span></div>
+          </div>
+        </header>
+
+        <div class="article-body">
+          <p>Hermes Agent 是我过去一年用得最久的 AI 代理——不是 OpenClaw 的继任者，是更"自进化"的一代。装了不下十次，踩过端口、venv、systemd、Termux 各种坑。这篇文章把整个流程拆开来讲，从官方一行 curl，到我后来手动拆的 systemd 常驻方案，全写下来。</p>
+
+          <blockquote>本文不是官方文档的复制品。官方 README 已经足够好——我这篇是讲"装完以后还要做什么"以及"哪些坑是文档没写的"。</blockquote>
+
+          <h2>TL;DR：最省事的装法</h2>
+          <p>如果你只是想用，一行命令搞定：</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-kw">curl</span> -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh <span class="tok-pun">|</span> <span class="tok-fn">bash</span></span></span></code></pre>
+          </div>
+
+          <p>装完重启 shell：</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-kw">source</span> ~/.bashrc    <span class="tok-com"># 或 source ~/.zshrc</span></span></span><span class="line"><span class="ln">2</span><span class="code"><span class="tok-fn">hermes</span>            <span class="tok-com"># 开始对话</span></span></span></code></pre>
+          </div>
+
+          <p>支持的系统：Linux、macOS、WSL2、Android (Termux)。Windows 原生不支持，要用请装 WSL2。</p>
+
+          <p>安装程序会自动处理：</p>
+          <ul>
+            <li><code>uv</code>（Python 包管理，比 pip 快 10-100 倍）</li>
+            <li>Python 3.11（Hermes 的最低要求）</li>
+            <li>Node.js（运行 Ink TUI 用的）</li>
+            <li>ripgrep、ffmpeg（部分 skill 需要）</li>
+            <li>MinGit（Windows 用，避免污染系统 Git）</li>
+          </ul>
+
+          <p>到这里，官方文档就讲完了。但 <strong>大多数人装完不会用</strong>——因为它默认装在 <code>~/.hermes</code> 下、没有 systemd 服务、跟现有服务可能抢端口。下面讲"装完还要做什么"。</p>
+
+          <h2>第一步（装完 5 分钟内）：先看装到哪了</h2>
+          <p>很多人在这一步就懵了——"我装了，但找不到文件"。</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-kw">which</span> hermes</span></span><span class="line"><span class="ln">2</span><span class="code"><span class="tok-kw">ls</span> -la ~/.hermes/ <span class="tok-pun">|</span> <span class="tok-fn">head</span> -20</span></span><span class="line"><span class="ln">3</span><span class="code"><span class="tok-kw">hermes</span> home    <span class="tok-com"># 官方命令，输出 HERMES_HOME 路径</span></span></span></code></pre>
+          </div>
+
+          <p>官方约定路径是 <code>~/.hermes</code>，所有配置、记忆、skills、日志都放这里。如果你用了 profile，路径会变成 <code>~/.hermes-profiles/&lt;name&gt;/</code>。</p>
+
+          <p>关键目录：</p>
+          <ul>
+            <li><code>~/.hermes/config.yaml</code> — 主配置（YAML）</li>
+            <li><code>~/.hermes/.env</code> — API keys（<strong>不要提交到 git</strong>）</li>
+            <li><code>~/.hermes/MEMORY.md</code> + <code>USER.md</code> — 记忆文件</li>
+            <li><code>~/.hermes/skills/</code> — 自定义技能</li>
+            <li><code>~/.hermes/logs/</code> — <code>agent.log</code> + <code>gateway.log</code></li>
+          </ul>
+
+          <h2>第二步：选模型（最常被问的）</h2>
+          <p>Hermes 不绑定任何模型供应商。一条命令切换：</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-fn">hermes</span> model</span></span><span class="line"><span class="ln">2</span><span class="code"></span></span><span class="line"><span class="ln">3</span><span class="code"><span class="tok-com"># 交互式选择 provider + model</span></span></span><span class="line"><span class="ln">4</span><span class="code"><span class="tok-com"># 或者直接指定：</span></span></span><span class="line"><span class="ln">5</span><span class="code"><span class="tok-fn">hermes</span> model openrouter:anthropic/claude-3.5-sonnet</span></span><span class="line"><span class="ln">6</span><span class="code"><span class="tok-fn">hermes</span> model minimax-cn:MiniMax-M3</span></span></code></pre>
+          </div>
+
+          <p>支持 200+ 模型。我自己常用的：</p>
+          <ul>
+            <li><strong>开发调试</strong>：OpenRouter 的 Claude 3.5 Sonnet（贵但稳）</li>
+            <li><strong>日常对话</strong>：<code>minimax-cn:MiniMax-M3</code>（我自己的 MiniMax 接入，便宜）</li>
+            <li><strong>离线/隐私</strong>：本地 Ollama（要先装 ollama + 拉模型）</li>
+          </ul>
+
+          <h2>第三步：让 Gateway 跑起来（飞书/Telegram 接入）</h2>
+          <p>如果你只想用 CLI，到这里就够了。但很多人装 Hermes 是为了<strong>从飞书/Telegram 跟它聊天</strong>——这就需要 Gateway。</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-fn">hermes</span> gateway setup    <span class="tok-com"># 交互式配置（输入飞书 app_id / app_secret）</span></span></span><span class="line"><span class="ln">2</span><span class="code"><span class="tok-fn">hermes</span> gateway start   <span class="tok-com"># 前台启动</span></span></span></code></pre>
+          </div>
+
+          <p>前台跑能用，但 SSH 一断就死。需要<strong>常驻后台</strong>——下面讲 systemd 化。</p>
+
+          <h3>手动写 systemd service（gateway 常驻）</h3>
+          <p>官方不提供 systemd unit（因为 Hermes 设计是个人开发工具，不是服务），但生产环境你需要。我手写的版本：</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">/etc/systemd/system/hermes-gateway.service</span>
+              <span class="lang">systemd</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-pun">[</span><span class="tok-kw">Unit</span><span class="tok-pun">]</span></span></span><span class="line"><span class="ln">2</span><span class="code">Description=<span class="tok-fn">Hermes</span> Agent Gateway - Messaging Platform Integration</span></span><span class="line"><span class="ln">3</span><span class="code">After=network-online.target</span></span><span class="line"><span class="ln">4</span><span class="code">Wants=network-online.target</span></span><span class="line"><span class="ln">5</span><span class="code">StartLimitIntervalSec=0</span></span><span class="line"><span class="ln">6</span><span class="code"></span></span><span class="line"><span class="ln">7</span><span class="code"><span class="tok-pun">[</span><span class="tok-kw">Service</span><span class="tok-pun">]</span></span></span><span class="line"><span class="ln">8</span><span class="code">Type=simple</span></span><span class="line"><span class="ln">9</span><span class="code">User=root</span></span><span class="line"><span class="ln">10</span><span class="code">Group=root</span></span><span class="line"><span class="ln">11</span><span class="code">ExecStart=/opt/hermes-venv/bin/python -m hermes_cli.main gateway run --replace</span></span><span class="line"><span class="ln">12</span><span class="code">WorkingDirectory=/root/.hermes</span></span><span class="line"><span class="ln">13</span><span class="code">Environment=<span class="tok-str">"HOME=/root"</span></span></span><span class="line"><span class="ln">14</span><span class="code">Environment=<span class="tok-str">"PATH=/opt/hermes-venv/bin:/root/.hermes/node/bin:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"</span></span></span><span class="line"><span class="ln">15</span><span class="code">Environment=<span class="tok-str">"VIRTUAL_ENV=/opt/hermes-venv"</span></span></span><span class="line"><span class="ln">16</span><span class="code">Environment=<span class="tok-str">"HERMES_HOME=/root/.hermes"</span></span></span><span class="line"><span class="ln">17</span><span class="code">Restart=always</span></span><span class="line"><span class="ln">18</span><span class="code">RestartSec=5</span></span><span class="line"><span class="ln">19</span><span class="code"></span></span><span class="line"><span class="ln">20</span><span class="code"><span class="tok-pun">[</span><span class="tok-kw">Install</span><span class="tok-pun">]</span></span></span><span class="line"><span class="ln">21</span><span class="code">WantedBy=multi-user.target</span></span></code></pre>
+          </div>
+
+          <p>注意几个坑：</p>
+
+          <div class="callout warn">
+            <div class="head">坑 1：vhost 路径必须在 PATH 里</div>
+            <p><code>ExecStart</code> 用了绝对路径 <code>/opt/hermes-venv/bin/python</code>——你装的位置可能不一样。装完先跑 <code>which python</code>（在 venv 里）确认实际位置。直接写 <code>python</code> 不行，systemd 的环境 PATH 跟你登录 shell 不一样。</p>
+          </div>
+
+          <div class="callout warn">
+            <div class="head">坑 2：HERMES_HOME 必须显式设</div>
+            <p>Hermes 不会从 <code>WorkingDirectory</code> 推断 <code>HERMES_HOME</code>，不设就找不到 <code>~/.hermes</code>。我之前栽过——Gateway 启动"成功"了，但日志全空，排查了半天才发现是它跑了个临时 profile。</p>
+          </div>
+
+          <div class="callout warn">
+            <div class="head">坑 3：HERMES_HOME 跟 VIRTUAL_ENV 配套</div>
+            <p>如果你用 <code>uv venv /opt/hermes-venv</code>，VIRTUAL_ENV 设成 <code>/opt/hermes-venv</code>，<strong>HERMES_HOME 别设到 venv 目录</strong>（我见过有人 <code>HERMES_HOME=/opt/hermes-venv</code>，结果 .hermes 目录被写到 venv 里——下次 uv 装包就把它清了）。</p>
+          </div>
+
+          <p>启用：</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-fn">systemctl</span> daemon-reload</span></span><span class="line"><span class="ln">2</span><span class="code"><span class="tok-fn">systemctl</span> <span class="tok-kw">enable</span> --now hermes-gateway</span></span><span class="line"><span class="ln">3</span><span class="code"><span class="tok-fn">systemctl</span> status hermes-gateway</span></span><span class="line"><span class="ln">4</span><span class="code"><span class="tok-fn">journalctl</span> -u hermes-gateway -f</span></span></code></pre>
+          </div>
+
+          <h2>第四步：接入飞书（最常问的）</h2>
+          <p>官方支持 Telegram/Discord/Slack/WhatsApp/Signal，<strong>飞书不在官方列表里</strong>——但有第三方 adapter。要装飞书：</p>
+
+          <ol>
+            <li>去 <a href="https://open.feishu.cn">飞书开放平台</a> 创建一个企业自建应用</li>
+            <li>权限至少给：<code>im:message</code>、<code>im:message:receive</code>、<code>im:message.group_at_msg</code></li>
+            <li>事件订阅 URL 填 <code>https://&lt;你的域名&gt;/feishu/webhook</code>（Hermes Gateway 默认端口）</li>
+            <li>把 App ID + App Secret 写到 <code>~/.hermes/.env</code>：</li>
+          </ol>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">~/.hermes/.env</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code">FEISHU_APP_ID=cli_xxxxxxxx</span></span><span class="line"><span class="ln">2</span><span class="code">FEISHU_APP_SECRET=****</span></span><span class="line"><span class="ln">3</span><span class="code">FEISHU_HOME_CHANNEL=oc_xxxxxxxx</span></span><span class="line"><span class="ln">4</span><span class="code">FEISHU_ENCRYPT_KEY=****</span></span><span class="line"><span class="ln">5</span><span class="code">FEISHU_VERIFICATION_TOKEN=****</span></span></code></pre>
+          </div>
+
+          <div class="callout warn">
+            <div class="head">飞书 App 上线必踩的坑：权限必须"发布"</div>
+            <p>加完权限要在「版本管理与发布」里点"保存"+"申请发布"。仅勾权限、不发版=没生效，错误码 1770024。我在这个坑上栽过 2 次才反应过来——文档里只字未提。</p>
+          </div>
+
+          <p>配置完后重启 gateway：</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-fn">systemctl</span> restart hermes-gateway</span></span><span class="line"><span class="ln">2</span><span class="code"><span class="tok-fn">journalctl</span> -u hermes-gateway --since <span class="tok-str">"1 min ago"</span></span></span><span class="line"><span class="ln">3</span><span class="code"></span></span><span class="line"><span class="ln">4</span><span class="code"><span class="tok-com"># 看到 "feishu: connected" 就 OK</span></span></span></code></pre>
+          </div>
+
+          <p>在飞书里给机器人发消息，应该能收到回复了。</p>
+
+          <h2>第五步：备份和迁移（装机必做）</h2>
+          <p>Hermes 真正值钱的是你的 <code>~/.hermes</code> 里的<strong>记忆 + skills + 配置</strong>——不是它本身。装新机器时，<code>git clone</code> + <code>curl install.sh</code> 一行就搞定，<strong>值钱的数据你得自己备份</strong>。</p>
+
+          <h3>最小备份集</h3>
+          <ul>
+            <li><code>~/.hermes/MEMORY.md</code> + <code>USER.md</code> — 核心记忆</li>
+            <li><code>~/.hermes/skills/</code> — 自定义技能（已发布的、累积改过的）</li>
+            <li><code>~/.hermes/config.yaml</code> — 主配置（不含 .env，密钥分开存）</li>
+            <li><code>~/.hermes/.env</code> — 密钥（<strong>单独加密存储</strong>，比如 1Password / Bitwarden）</li>
+          </ul>
+
+          <h3>迁移脚本（我用的）</h3>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">~/bin/hermes-backup.sh</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-com">#!/usr/bin/env bash</span></span></span><span class="line"><span class="ln">2</span><span class="code"><span class="tok-kw">set</span> -e</span></span><span class="line"><span class="ln">3</span><span class="code">DEST=<span class="tok-str">"<span class="tok-var">$1</span>:~/backup/hermes/$(date +%Y%m%d)"</span></span></span><span class="line"><span class="ln">4</span><span class="code"></span></span><span class="line"><span class="ln">5</span><span class="code"><span class="tok-kw">if</span> <span class="tok-pun">[</span> -z <span class="tok-str">"<span class="tok-var">$1</span>"</span> <span class="tok-pun">]</span>; <span class="tok-kw">then</span></span></span><span class="line"><span class="ln">6</span><span class="code">    <span class="tok-fn">echo</span> <span class="tok-str">"usage: hermes-backup.sh user@host"</span></span></span><span class="line"><span class="ln">7</span><span class="code">    <span class="tok-fn">exit</span> 1</span></span><span class="line"><span class="ln">8</span><span class="code"><span class="tok-kw">fi</span></span></span><span class="line"><span class="ln">9</span><span class="code"></span></span><span class="line"><span class="ln">10</span><span class="code">rsync -avz --progress \</span></span><span class="line"><span class="ln">11</span><span class="code">    --exclude=<span class="tok-str">"*.lock"</span> \</span></span><span class="line"><span class="ln">12</span><span class="code">    --exclude=<span class="tok-str">"cache/"</span> \</span></span><span class="line"><span class="ln">13</span><span class="code">    --exclude=<span class="tok-str">"*.log"</span> \</span></span><span class="line"><span class="ln">14</span><span class="code">    --exclude=<span class="tok-str">"models/"</span> \</span></span><span class="line"><span class="ln">15</span><span class="code">    ~/.hermes/ <span class="tok-str">"<span class="tok-var">$DEST</span>"</span></span></span><span class="line"><span class="ln">16</span><span class="code"></span></span><span class="line"><span class="ln">17</span><span class="code"><span class="tok-kw">if</span> <span class="tok-pun">[</span> -f ~/.hermes/.env <span class="tok-pun">]</span>; <span class="tok-kw">then</span></span></span><span class="line"><span class="ln">18</span><span class="code">    <span class="tok-fn">scp</span> ~/.hermes/.env <span class="tok-str">"<span class="tok-var">$DEST</span>/.env"</span></span></span><span class="line"><span class="ln">19</span><span class="code"><span class="tok-kw">fi</span></span></span><span class="line"><span class="ln">20</span><span class="code"></span></span><span class="line"><span class="ln">21</span><span class="code"><span class="tok-fn">echo</span> <span class="tok-str">"✓ backup at <span class="tok-var">$DEST</span>"</span></span></span></code></pre>
+          </div>
+
+          <p>恢复时：</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-com"># 新机器</span></span></span><span class="line"><span class="ln">2</span><span class="code"><span class="tok-kw">curl</span> -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh <span class="tok-pun">|</span> <span class="tok-fn">bash</span></span></span><span class="line"><span class="ln">3</span><span class="code"></span></span><span class="line"><span class="ln">4</span><span class="code"><span class="tok-com"># 停掉 gateway，恢复 .hermes</span></span></span><span class="line"><span class="ln">5</span><span class="code"><span class="tok-fn">systemctl</span> stop hermes-gateway 2>/dev/null <span class="tok-pun">||</span> <span class="tok-kw">true</span></span></span><span class="line"><span class="ln">6</span><span class="code"><span class="tok-fn">rsync</span> -avz ~/backup/hermes/20260610/ ~/.hermes/</span></span><span class="line"><span class="ln">7</span><span class="code"></span></span><span class="line"><span class="ln">8</span><span class="code"><span class="tok-com"># 启动</span></span></span><span class="line"><span class="ln">9</span><span class="code"><span class="tok-fn">systemctl</span> <span class="tok-kw">enable</span> --now hermes-gateway</span></span></code></pre>
+          </div>
+
+          <p>记忆、技能、偏好全回来了。</p>
+
+          <h2>常见坑速查</h2>
+
+          <h3>1. "装完跑 hermes 报错 ModuleNotFoundError"</h3>
+          <p>基本是 venv 没激活，或者 systemd 跑的不是 venv 里的 Python。<code>which python</code>（在 venv 里）确认路径，把 ExecStart 改成绝对路径。</p>
+
+          <h3>2. "Gateway 启动了，飞书消息收不到"</h3>
+          <p>去 <code>journalctl -u hermes-gateway</code> 看是不是 <code>FEISHU_APP_SECRET not set</code>。<code>hermes config set</code> 设了但没写到 <code>.env</code>——手动 export 或者在 service 的 Environment 里加。</p>
+
+          <h3>3. "RSS/定时任务跑了但没投递"</h3>
+          <p>Cron 任务完成后默认存到 <code>~/.hermes/cron/output/</code>，不投递。要投递到飞书/Telegram，在 <code>hermes config</code> 里设 <code>cron.delivery</code>。</p>
+
+          <h3>4. "升级后旧 skills 失效"</h3>
+          <p>Hermes 的 skills 跟版本有耦合关系。升完跑 <code>hermes doctor</code>，它会列出哪些 skill 兼容、哪些需要重装。一次性脚本：</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <span class="filename">terminal</span>
+              <span class="lang">bash</span>
+            </div>
+            <pre><code><span class="line"><span class="ln">1</span><span class="code"><span class="tok-fn">hermes</span> update</span></span><span class="line"><span class="ln">2</span><span class="code"><span class="tok-fn">hermes</span> doctor</span></span><span class="line"><span class="ln">3</span><span class="code"><span class="tok-fn">hermes</span> skills --refresh</span></span></code></pre>
+          </div>
+
+          <h2>什么时候不要装</h2>
+          <p>老实说几句：</p>
+          <ul>
+            <li><strong>Windows 原生</strong>：官方明确 early beta，坑多。先上 WSL2。</li>
+            <li><strong>Mac Apple Silicon</strong>：能装能跑，但 TUI 有时字体渲染有问题。介意的话 Linux server 走起。</li>
+            <li><strong>没有持久磁盘的 serverless</strong>：用 Daytona/Modal 后端，本地不装。</li>
+            <li><strong>只是想要个 ChatGPT 替代</strong>：太重了，<code>llm</code> CLI 工具够用。</li>
+          </ul>
+
+          <h2>装完之后</h2>
+          <p>命令行先跑 <code>hermes doctor</code> 看下健康度——它会告诉你 env、模型、gateway、cron 各自状态。</p>
+          <p>然后从飞书发一句"在吗"过去——能收到回复就算打通。</p>
+          <p>最后，给我自己的系统装个备份 cron，每天 3 点跑一次 <code>hermes-backup.sh</code>。</p>
+          <p>三步搞定，剩下的就是让它<strong>自己慢慢长大</strong>。</p>
+        </div>
+
+        <footer class="article-footer">
+          <div class="tag-row">
+            <a href="#">#Hermes</a>
+            <a href="#">#AI-Agent</a>
+            <a href="#">#安装</a>
+            <a href="#">#systemd</a>
+            <a href="#">#飞书</a>
+            <a href="#">#tech</a>
+          </div>
+          <div class="article-nav">
+            <a href="./article.html" class="nav-card prev">
+              <div class="label">cd ../previous</div>
+              <h4>← AI 不会取代作家，但会改变"写作"本身</h4>
+            </a>
+            <a href="./article.html" class="nav-card next">
+              <div class="label next">cd ../next</div>
+              <h4>从 Vim 到 Neovim：一次完整的迁移记录 →</h4>
+            </a>
+          </div>
+        </footer>
+      </article>
+    </div>
+  </main>
+
+  <div class="divider"><span class="hash">#</span><span class="eq">============</span><span class="title">end of file</span><span class="eq">============</span><span class="hash">#</span></div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h4>echo "雁鸣集"</h4>
+        <p>一封每周三到的邮件，写给想慢下来的人。订阅完全免费，随时可以退订。</p>
+      </div>
+      <div class="footer-col">
+        <h5>navigation</h5>
+        <ul>
+          <li><a href="./index.html">./issue-042</a></li>
+          <li><a href="./archive.html">./archive</a></li>
+          <li><a href="./index.html#rss">./rss</a></li>
+          <li><a href="./index.html#about">./about</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>contact</h5>
+        <ul>
+          <li><a href="./index.html#subscribe">./subscribe</a></li>
+          <li><a href="#">./twitter</a></li>
+          <li><a href="#">./github</a></li>
+          <li><a href="#">./submit</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>// © 2026 雁鸣集 — built with vim &amp; patience</span>
+      <span>EOF</span>
+    </div>
+  </footer>
+</body>
+</html>
