@@ -6,7 +6,7 @@
     1. 从 article.html 复制（创建新文章）或直接读（更新现有文章）
     2. 只 patch 4 个位置：title / h1 / article-tags / article-nav
     3. 正文（article-body）永远不动 — 用户自己维护
-    4. 同步更新 index.html / archive.html / articles.json
+    4. 同步更新 index.html / archive.html / data/articles.json
     5. 可选 git push + wrangler deploy
 
 用法：
@@ -29,7 +29,7 @@
 操作：
     --dry-run                     只打印改动，不写文件
     --no-deploy                   写文件但不 git push + 不 wrangler deploy
-    --init-from-archive           从 archive.html 反向解析已有文章，生成 articles.json
+    --init-from-archive           从 archive.html 反向解析已有文章，生成 data/articles.json
     --update-nav-only             只更新所有文章的 prev/next 链接（不重建任何文章）
 
 示例：
@@ -56,9 +56,11 @@ import sys
 from datetime import date
 from pathlib import Path
 
-ROOT = Path('/www/wwwroot/yanming-ji-blog')
+# 站点根目录（脚本所在位置的上一级）+ 数据目录
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / 'data'
 ARTICLE_HTML = ROOT / 'article.html'
-DATA_JSON = ROOT / 'articles.json'
+DATA_JSON = DATA_DIR / 'articles.json'
 
 
 # ---------- 数据源 ----------
@@ -285,7 +287,7 @@ def main():
     ap.add_argument('--dry-run', action='store_true', help='只打印不写')
     ap.add_argument('--no-deploy', action='store_true', help='不 git/deploy')
     ap.add_argument('--init-from-archive', action='store_true',
-                    help='从 archive.html 反向解析生成 articles.json')
+                    help='从 archive.html 反向解析生成 data/articles.json')
     ap.add_argument('--update-nav-only', action='store_true',
                     help='只重算所有文章的 prev/next，不修改其他字段')
     args = ap.parse_args()
@@ -308,7 +310,7 @@ def main():
     # 加载数据（先看 slug 在不在数据源里 —— 决定 title/excerpt 是否必填）
     articles = load_articles_from_json()
     if articles is None:
-        print('  articles.json 不存在，从 archive.html 反向解析...')
+        print('  data/articles.json 不存在，从 archive.html 反向解析...')
         articles = load_articles_from_archive()
         print(f'  解析到 {len(articles)} 篇')
     slug_existing = any(a['slug'] == args.slug for a in articles)
