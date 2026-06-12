@@ -189,8 +189,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 一行总览</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> version <span class="tok-fn">--format</span> &<span class="tok-com">#x27;{{.Server.Version}} | {{.Client.Version}}&#x27; 2&gt;&amp;1</span></span></span>
@@ -213,8 +213,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 官方脚本（国内可能慢）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code">curl <span class="tok-fn">-fs</span>SL https://get.docker.com | bash</span></span>
@@ -234,8 +234,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 标准位置</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">sudo</span> nano /etc/docker/daemon.json</span></span></code></pre>
@@ -244,8 +244,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">daemon.json</span>
+  <span class="lang">json</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code">{</span></span>
 <span class="line"><span class="ln">  2</span><span class="code">  <span class="tok-str">&quot;registry-mirrors&quot;</span>: [</span></span>
@@ -267,8 +267,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">sudo</span> systemctl restart <span class="tok-kw">docker</span></span></span></code></pre>
 </div>
@@ -337,8 +337,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 启停</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">sudo</span> systemctl start <span class="tok-kw">docker</span></span></span>
@@ -369,8 +369,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 临时容器重启策略</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">--restart</span>=no               myimage  <span class="tok-com"># 默认：不重启</span></span></span>
@@ -381,8 +381,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 已运行容器改重启策略</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> update <span class="tok-fn">--restart</span>=unless<span class="tok-fn">-stopped</span> &lt;container&gt;</span></span>
@@ -396,8 +396,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> pull mysql:8.0                       <span class="tok-com"># 官方</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> pull registry.cn<span class="tok-fn">-hangzhou</span>.aliyuncs.com/namespace/repo:tag   <span class="tok-com"># 阿里云</span></span></span>
@@ -412,8 +412,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> images                              <span class="tok-com"># 本地所有</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> images <span class="tok-fn">-a</span>                           <span class="tok-com"># 含中间层</span></span></span>
@@ -431,8 +431,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 打标签</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> tag mysql:8.0 myregistry.com/mysql:8.0</span></span>
@@ -449,8 +449,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 标准构建</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> build <span class="tok-fn">-t</span> myapp:1.0 .</span></span>
@@ -469,8 +469,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">Dockerfile</span>
+  <span class="lang">dockerfile</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># syntax=docker/dockerfile:1.7</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">FROM</span> python:3.12<span class="tok-fn">-slim</span> AS builder</span></span>
@@ -491,8 +491,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> history mysql:8.0                   <span class="tok-com"># 层历史</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> inspect mysql:8.0                   <span class="tok-com"># 完整 JSON</span></span></span>
@@ -505,8 +505,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 运行</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">-d</span> <span class="tok-fn">--name</span> web <span class="tok-fn">-p</span> 8080:80 nginx:alpine</span></span>
@@ -541,8 +541,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">exec</span> <span class="tok-fn">-it</span> &lt;container&gt; bash             <span class="tok-com"># 首选 bash</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">exec</span> <span class="tok-fn">-it</span> &lt;container&gt; sh               <span class="tok-com"># 镜像只有 sh 时（alpine）</span></span></span>
@@ -557,8 +557,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> logs &lt;container&gt;                <span class="tok-com"># 全部</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> logs <span class="tok-fn">--tail</span> 100 &lt;container&gt;     <span class="tok-com"># 最后 100 行</span></span></span>
@@ -571,8 +571,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> stats                  <span class="tok-com"># 实时</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> stats <span class="tok-fn">--no-stream</span>       <span class="tok-com"># 快照</span></span></span>
@@ -585,8 +585,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 进程</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> top &lt;container&gt;</span></span>
@@ -605,8 +605,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 把运行中容器的变更打包成新镜像（不推荐做生产镜像）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> commit &lt;container&gt; myimage:custom</span></span>
@@ -620,8 +620,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># -p 语法：-p &lt;host_ip&gt;:&lt;host_port&gt;:&lt;container_port&gt;/&lt;protocol&gt;</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">-p</span> 8080:80 nginx               <span class="tok-com"># 主机 8080 → 容器 80</span></span></span>
@@ -634,8 +634,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 创建</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> network create mynet</span></span>
@@ -698,8 +698,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 容器内 DNS 由 dockerd 控制（默认从主机继承）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">--dns</span> 8.8.8.8 <span class="tok-fn">--dns</span> 114.114.114.114 myapp</span></span>
@@ -715,8 +715,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 1) Volume（推荐，docker 管理）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> volume create mydata</span></span>
@@ -735,8 +735,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> volume ls</span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> volume inspect mydata</span></span>
@@ -747,8 +747,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 备份（其它容器挂载到目标卷，打包）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">--rm</span> \</span></span>
@@ -769,8 +769,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 容器内进程以 root 跑（默认），文件会成 root:root</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-com"># 想跟主机用户对齐：</span></span></span>
@@ -787,8 +787,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">compose.yaml</span>
+  <span class="lang">yaml</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># compose.yaml（旧名 docker-compose.yml 也认）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">services:</span></span></span>
@@ -835,7 +835,7 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
+  <span class="filename">block</span>
   <span class="lang">text</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code">MYSQL_ROOT_PASSWORD=actual<span class="tok-fn">-secret-here</span></span></span></code></pre>
@@ -844,8 +844,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 启动</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> compose up <span class="tok-fn">-d</span>                     <span class="tok-com"># 后台</span></span></span>
@@ -892,8 +892,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 基础 compose.yaml + override</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> compose <span class="tok-fn">-f</span> compose.yaml <span class="tok-fn">-f</span> compose.prod.yaml up <span class="tok-fn">-d</span></span></span>
@@ -907,8 +907,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 部署脚本模板（幂等）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-com">#!/bin/bash</span></span></span>
@@ -926,8 +926,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 单个环境变量</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">-e</span> KEY=value myapp</span></span>
@@ -948,8 +948,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 内存</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">-m</span> 512m myapp                    <span class="tok-com"># 硬限 512M</span></span></span>
@@ -973,8 +973,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> update <span class="tok-fn">-m</span> 1g &lt;container&gt;</span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> update <span class="tok-fn">--cpus</span> 2 &lt;container&gt;</span></span></code></pre>
@@ -984,8 +984,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># Dockerfile 里</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code">HEALTHCHECK <span class="tok-fn">--interval</span>=30s <span class="tok-fn">--timeout</span>=5s <span class="tok-fn">--retries</span>=3 \</span></span>
@@ -994,8 +994,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 运行时</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> inspect <span class="tok-fn">--format</span>=&<span class="tok-com">#x27;{{json .State.Health}}&#x27; &lt;container&gt; | jq .</span></span></span>
@@ -1014,8 +1014,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 配置（写在 daemon.json）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code">{</span></span>
@@ -1033,8 +1033,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 推到 syslog</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">--log-driver</span>=syslog <span class="tok-fn">--log-opt</span> syslog<span class="tok-fn">-address</span>=tcp://logserver:514 myapp</span></span>
@@ -1050,8 +1050,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 实时跟踪</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> logs <span class="tok-fn">-f</span> &lt;container&gt; 2&gt;&amp;1 | grep <span class="tok-fn">-i</span> error</span></span>
@@ -1066,8 +1066,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 1) 看日志</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> logs &lt;container&gt;</span></span>
@@ -1090,8 +1090,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 看完整错误</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">sudo</span> journalctl <span class="tok-fn">-u</span> <span class="tok-kw">docker</span> <span class="tok-fn">-n</span> 100 <span class="tok-fn">--no-pager</span></span></span>
@@ -1105,8 +1105,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 1) 先确认不是网络问题</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code">curl -I https://mirror.ccs.tencentyun.com/v2/</span></span>
@@ -1123,8 +1123,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 容器之间不通</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> network inspect mynet      <span class="tok-com"># 是不是在同一 net</span></span></span>
@@ -1146,8 +1146,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 看 docker 占用</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> system df</span></span>
@@ -1169,8 +1169,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 方法 1：挂主机时区</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">-v</span> /etc/localtime:/etc/localtime:ro myapp</span></span>
@@ -1186,8 +1186,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code">environment:</span></span>
 <span class="line"><span class="ln">  2</span><span class="code">  - LANG=C.UTF-8</span></span>
@@ -1199,8 +1199,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 扫漏洞</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> scan &lt;image&gt;            <span class="tok-com"># 内置（要登录 Docker Hub）</span></span></span>
@@ -1213,8 +1213,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 禁特权</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">--security-opt</span> no<span class="tok-fn">-new-privileges</span> myapp</span></span>
@@ -1239,8 +1239,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 绝不要把 .env 写进镜像</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-com"># 绝不要 docker run -e KEY=xxx 还录屏/截图</span></span></span>
@@ -1253,8 +1253,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 初始化集群</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> swarm init</span></span>
@@ -1280,8 +1280,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 总体磁盘</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> system df</span></span>
@@ -1302,8 +1302,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># /etc/cron.d/docker-cleanup</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code">0 3 * * 0 root <span class="tok-kw">docker</span> image prune <span class="tok-fn">-a</span> <span class="tok-fn">-f</span> <span class="tok-fn">--filter</span> <span class="tok-str">&quot;until=168h&quot;</span>  <span class="tok-com"># 7 天前未用镜像</span></span></span>
@@ -1317,8 +1317,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> buildx create <span class="tok-fn">--use</span> <span class="tok-fn">--name</span> mybuilder</span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> buildx build <span class="tok-fn">--platform</span> linux/amd64,linux/arm64 <span class="tok-fn">-t</span> myapp:1.0 <span class="tok-fn">--push</span> .</span></span></code></pre>
@@ -1327,8 +1327,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 登录</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> login registry.cn<span class="tok-fn">-hangzhou</span>.aliyuncs.com <span class="tok-fn">-u</span> xxx <span class="tok-fn">-p</span> yyy</span></span>
@@ -1344,8 +1344,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">--privileged</span> <span class="tok-fn">-d</span> <span class="tok-fn">--name</span> dind docker:dind</span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-com"># 主机端口 2375/2376 暴露出来，CI 客户端连进去</span></span></span></code></pre>
@@ -1355,8 +1355,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> cp ./local.conf &lt;container&gt;:/etc/nginx/conf.d/</span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> cp &lt;container&gt;:/var/log/nginx/access.log ./</span></span></code></pre>
@@ -1365,8 +1365,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">--userns</span>=host myapp                  <span class="tok-com"># 共享主机用户 ns（少见）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">--pid</span>=host myapp                     <span class="tok-com"># 共享主机 PID（看主机进程）</span></span></span>
@@ -1376,8 +1376,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">Dockerfile</span>
+  <span class="lang">dockerfile</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># syntax=docker/dockerfile:1.7</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">RUN</span> <span class="tok-fn">--mount</span>=type=cache,target=/root/.cache/pip \</span></span>
@@ -1388,8 +1388,8 @@
 <div class="code-block">
 <div class="code-header">
   <div class="dots"><span></span><span></span><span></span></div>
-  <span class="filename"></span>
-  <span class="lang">text</span>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
 </div>
 <pre><code><span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 收集完整诊断信息（出问题时跑一下）</span></span></span>
 <span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">cat</span> &lt;&lt; &<span class="tok-com">#x27;EOF&#x27; &gt; /tmp/docker-diag.sh</span></span></span>
@@ -1450,8 +1450,46 @@
             <a href="#">#手册</a>
           </div>
           <div class="article-nav">
-            <a href="./article.html" class="nav-card prev">
+            <a href="./hermes-install.html" class="nav-card prev">
               <div class="label">cd ../previous</div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <div></div>
+          </div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <div></div>
+          </div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <div></div>
+          </div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <div></div>
+          </div>
+            <a href="./hermes-install.html" class="nav-card next">
+              <div class="label">cd ../next</div>
+              <h4>Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻 →</h4>
+            </a>
+          </div>
+            <a href="./hermes-install.html" class="nav-card next">
+              <div class="label">cd ../next</div>
+              <h4>Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻 →</h4>
+            </a>
+          </div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <div></div>
+          </div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <div></div>
+          </div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <div></div>
+          </div>
               <h4>← AI 不会取代作家，但会改变"写作"本身</h4>
             </a>
             <a href="./hermes-install.html" class="nav-card next">

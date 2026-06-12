@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "hermes-install",
+    "title": "Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻",
+    "date": "2026-06-11",
+    "read": 12,
+    "tag": "tech",
+    "excerpt": "一行 curl 装好之后还要做什么？systemd 化、飞书接入、备份迁移、常见 4 个坑——这篇写我从装到用的完整流程。",
+    "top": true,
+    "cover": false,
+    "visual": "p1",
+    "article_tags": []
+  },
+  {
+    "slug": "docker-ops",
+    "title": "Docker 运维手册（Ubuntu 24.04 / Docker 26 / Compose v2）",
+    "date": "2026-06-10",
+    "read": 18,
+    "tag": "tech",
+    "excerpt": "1030 行 / 18 节 / 60 个代码块——从环境速查、排障大全到一键诊断脚本。本机权威手册，覆盖安装、网络、卷、Compose、安全、监控、Swarm、buildx 全场景。",
+    "top": false,
+    "cover": false,
+    "visual": "p1",
+    "article_tags": []
+  }
+]
