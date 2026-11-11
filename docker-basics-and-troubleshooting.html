@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker 从入门到排查：容器基础、达梦定位与日常运维 — 鹏飞日记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Sans+SC:wght@300;400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000000;
+    --panel: #0A0A0A;
+    --panel-2: #111113;
+    --border: #1F1F1F;
+    --border-2: #2A2A2E;
+    --text: #E4E4E7;
+    --muted: #71717A;
+    --comment: #6B7280;
+    --keyword: #7DD3FC;
+    --string: #A7F3D0;
+    --number: #FCA5A5;
+    --function: #C4B5FD;
+    --variable: #FDE68A;
+    --cta: #22D3EE;
+  }
+  html, body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', 'IBM Plex Sans SC', -apple-system, system-ui, sans-serif; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  button, input { font-family: inherit; }
+  code, pre, .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+  ::selection { background: var(--cta); color: #000; }
+
+  /* Nav (shared) */
+  header.site-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 28px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .path { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); }
+  .brand .path .p1 { color: var(--muted); }
+  .brand .path .p2 { color: var(--keyword); }
+  .brand .path .p3 { color: var(--string); }
+  .brand .path .cursor { display: inline-block; width: 8px; height: 16px; background: var(--cta); animation: blink 1.1s step-end infinite; vertical-align: middle; margin-left: 4px; }
+  @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  .nav-tabs { display: flex; gap: 0; }
+  .nav-tabs a {
+    padding: 0 16px; height: 56px; display: inline-flex; align-items: center;
+    color: var(--muted); font-size: 13px; font-family: 'JetBrains Mono', monospace;
+    border-bottom: 2px solid transparent; transition: color .15s, border-color .15s;
+  }
+  .nav-tabs a:hover, .nav-tabs a.active { color: var(--text); border-bottom-color: var(--cta); }
+  .nav-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; background: var(--cta); color: #000;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    border-radius: 4px; transition: filter .2s;
+  }
+  .nav-cta:hover { filter: brightness(1.15); }
+
+  .divider {
+    display: flex; align-items: center; gap: 16px; padding: 0 28px;
+    color: var(--comment); font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .divider .line { flex: 1; height: 1px; background: var(--border); }
+  .divider .hash { color: var(--muted); }
+  .divider .title { color: var(--text); font-weight: 500; }
+  .divider .eq { color: var(--muted); }
+
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 28px; }
+
+  /* Article header */
+  .article-header { padding: 60px 0 40px; }
+  .breadcrumb { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--comment); margin-bottom: 32px; }
+  .breadcrumb a { color: var(--muted); }
+  .breadcrumb a:hover { color: var(--cta); }
+  .breadcrumb .sep { color: var(--border-2); margin: 0 8px; }
+  .article-tag {
+    display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--cta); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px;
+  }
+  .article-tag::before { content: '['; color: var(--muted); }
+  .article-tag::after { content: ']'; color: var(--muted); }
+  .article-title {
+    font-family: 'IBM Plex Serif', 'IBM Plex Sans SC', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.2; font-weight: 600; color: var(--text);
+    margin-bottom: 24px; letter-spacing: -0.01em;
+  }
+  .article-meta {
+    display: flex; flex-wrap: wrap; gap: 24px; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted);
+    padding: 18px 0; border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border);
+  }
+  .article-meta .k { color: var(--comment); }
+  .article-meta .v { color: var(--function); }
+  .article-meta .author-avatar {
+    width: 28px; height: 28px; border-radius: 4px; background: var(--panel-2);
+    border: 1px solid var(--border-2); display: inline-grid; place-items: center;
+    color: var(--keyword); font-size: 12px; font-weight: 600;
+  }
+
+  /* Article body */
+  .article-body {
+    padding: 50px 0 80px;
+    font-family: 'IBM Plex Serif', 'IBM Plex Sans SC', serif;
+    font-size: 18px; line-height: 1.85; color: var(--text);
+  }
+  .article-body p { margin-bottom: 28px; }
+  .article-body h2 {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 28px; font-weight: 600; color: var(--text);
+    margin-top: 56px; margin-bottom: 24px; letter-spacing: -0.01em;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .article-body h2::before { content: '## '; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 22px; }
+  .article-body h3 {
+    font-family: 'IBM Plex Serif', serif;
+    font-size: 22px; font-weight: 600; color: var(--text);
+    margin-top: 40px; margin-bottom: 18px;
+  }
+  .article-body h3::before { content: '### '; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 18px; }
+  .article-body ul, .article-body ol { margin: 0 0 28px 24px; }
+  .article-body li { margin-bottom: 10px; }
+  .article-body blockquote {
+    border-left: 3px solid var(--cta);
+    padding: 8px 0 8px 20px; margin: 28px 0;
+    color: var(--muted); font-style: italic;
+  }
+  .article-body blockquote::before { content: '> '; color: var(--cta); font-style: normal; font-family: 'JetBrains Mono', monospace; }
+  .article-body strong { color: var(--text); font-weight: 600; }
+  .article-body em { color: var(--function); font-style: italic; }
+  .article-body a { color: var(--cta); border-bottom: 1px dashed var(--cta); }
+  .article-body a:hover { color: var(--text); border-bottom-color: var(--text); }
+  .article-body code:not(pre code) {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.88em;
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 2px 6px; border-radius: 3px; color: var(--string);
+  }
+
+  /* Table block (IDE style, matching docker-ops) */
+  .table-block { margin: 28px 0; overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); }
+  .table-block table { width: 100%; border-collapse: collapse; font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+  .table-block th { background: var(--panel-2); color: var(--cta); text-align: left; padding: 10px 14px; font-weight: 600; border-bottom: 1px solid var(--border-2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .table-block td { padding: 10px 14px; color: var(--text); border-bottom: 1px solid var(--border); line-height: 1.6; vertical-align: top; }
+  .table-block tr:last-child td { border-bottom: none; }
+  .table-block tr:hover td { background: rgba(255,255,255,0.02); }
+  .table-block code { background: transparent; color: var(--string); padding: 0; border: none; }
+
+  /* Code block (IDE style with line numbers) */
+  .code-block {
+    margin: 32px 0; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+  }
+  .code-block .code-header {
+    display: flex; align-items: center; gap: 10px; padding: 10px 18px;
+    background: var(--panel-2); border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .code-block .code-header .dots { display: flex; gap: 6px; }
+  .code-block .code-header .dots span { width: 10px; height: 10px; border-radius: 50%; background: var(--border-2); }
+  .code-block .code-header .dots span:nth-child(1) { background: #FCA5A5; }
+  .code-block .code-header .dots span:nth-child(2) { background: #FDE68A; }
+  .code-block .code-header .dots span:nth-child(3) { background: #A7F3D0; }
+  .code-block .code-header .filename { color: var(--text); }
+  .code-block .code-header .lang { margin-left: auto; color: var(--comment); }
+  .code-block pre {
+    margin: 0; padding: 18px 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7;
+    color: var(--text); overflow-x: auto;
+  }
+  .code-block pre code { display: block; }
+  .code-block .line {
+    display: flex; padding: 0 18px;
+  }
+  .code-block .line:hover { background: rgba(255,255,255,0.02); }
+  .code-block .line .ln {
+    flex: 0 0 40px; color: var(--comment); user-select: none; text-align: right;
+    padding-right: 16px;
+  }
+  .code-block .line .code { flex: 1; white-space: pre; }
+
+  /* Syntax tokens (lightweight highlighter) */
+  .tok-kw { color: var(--keyword); }
+  .tok-str { color: var(--string); }
+  .tok-num { color: var(--number); }
+  .tok-fn { color: var(--function); }
+  .tok-var { color: var(--variable); }
+  .tok-com { color: var(--comment); font-style: italic; }
+  .tok-pun { color: var(--muted); }
+
+  /* Article footer */
+  .article-footer { padding: 40px 0 100px; border-top: 1px solid var(--border); margin-top: 40px; }
+  .article-footer .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+  .article-footer .tag-row a {
+    padding: 4px 10px; border: 1px solid var(--border-2); border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .article-footer .tag-row a:hover { color: var(--cta); border-color: var(--cta); }
+  .article-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .article-nav .nav-card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+    padding: 22px; transition: border-color .2s, transform .2s; display: block;
+  }
+  .article-nav .nav-card:hover { border-color: var(--border-2); transform: translateY(-2px); }
+  .article-nav .nav-card .label { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--comment); margin-bottom: 8px; }
+  .article-nav .nav-card .label::before { content: '$ '; color: var(--string); }
+  .article-nav .nav-card.next { text-align: right; }
+  .article-nav .nav-card .label.next::before { content: ''; }
+  .article-nav .nav-card .label.next::after { content: ' $'; color: var(--string); }
+  .article-nav .nav-card h4 { font-size: 16px; color: var(--text); font-weight: 600; }
+
+  /* Footer */
+  footer { background: var(--panel); border-top: 1px solid var(--border); padding: 60px 0 30px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; max-width: 1200px; margin: 0 auto 40px; padding: 0 28px; }
+  .footer-brand h4 { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--text); margin-bottom: 12px; }
+  .footer-brand h4::before { content: '$ '; color: var(--string); }
+  .footer-brand p { color: var(--muted); font-size: 14px; max-width: 360px; line-height: 1.6; }
+  .footer-col h5 { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--cta); margin-bottom: 14px; }
+  .footer-col h5::before { content: '## '; color: var(--muted); }
+  .footer-col ul { list-style: none; }
+  .footer-col li { margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .footer-col a { color: var(--muted); transition: color .2s; }
+  .footer-col a:hover { color: var(--text); }
+  .footer-col a::before { content: '→ '; color: var(--border-2); }
+  .footer-bottom { padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; color: var(--comment); font-family: 'JetBrains Mono', monospace; font-size: 12px; max-width: 1200px; margin: 0 auto; padding-left: 28px; padding-right: 28px; }
+
+  @media (max-width: 900px) {
+    .nav-tabs { display: none; }
+    .article-nav { grid-template-columns: 1fr; }
+    .article-nav .nav-card.next { text-align: left; }
+    .article-nav .nav-card .label.next::before { content: '$ '; }
+    .article-nav .nav-card .label.next::after { content: ''; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .article-body { font-size: 16px; }
+    .article-title { font-size: 28px; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .footer-bottom { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+  <header class="site-nav">
+    <div class="nav-inner">
+      <a href="./index.html" class="brand">
+        <span class="path mono"><span class="p1">~</span>/<span class="p2">writing</span>/<span class="p3">pengfei-riji</span><span class="cursor"></span></span>
+      </a>
+      <nav class="nav-tabs">
+        <a href="./index.html">./issue-042</a>
+        <a href="./archive.html">./archive</a>
+        <a href="./index.html#author">./author</a>
+        <a href="./index.html#about">./about</a>
+        <a href="./index.html#rss">./rss</a>
+      </nav>
+      <a href="./index.html#subscribe" class="nav-cta">$ ./subscribe</a>
+    </div>
+  </header>
+
+  <div class="divider"><span class="hash">#</span><span class="eq">============</span><span class="title">article</span><span class="eq">============</span><span class="hash">#</span></div>
+
+  <main>
+    <div class="wrap">
+      <article>
+        <header class="article-header">
+          <div class="breadcrumb">
+            <a href="./index.html">~</a><span class="sep">/</span>
+            <a href="./archive.html">writing</a><span class="sep">/</span>
+            <span>article-01.md</span>
+          </div>
+          <span class="article-tag">cover story</span>
+          <h1 class="article-title">Docker 从入门到排查：容器基础、达梦定位与日常运维</h1>
+          <div class="article-meta">
+            <span class="author-avatar">鹏</span>
+            <div><span class="k">author:</span> <span class="v">鹏飞</span></div>
+            <div><span class="k">date:</span> <span class="v">2026-11-11</span></div>
+            <div><span class="k">read:</span> <span class="v">15min</span></div>
+            <div><span class="k">words:</span> <span class="v">2,926</span></div>
+            <div><span class="k">commits:</span> <span class="v">1</span></div>
+          </div>
+        </header>
+
+        <div class="article-body">
+          <blockquote>
+          <p>这篇文章的起因是一次真实的排查：用户问&quot;达梦数据库装在哪&quot;，先在 <code>docker ps</code> 里找不到，再在宿主机上也找不到，最后靠&quot;应用连的库在哪&quot;才定位到方向。这篇把 Docker 从概念到实战排查完整记下来，既是一份入门笔记，也是一张排障地图。</p>
+          </blockquote>
+<hr class="md-sep">
+<h2>1. 先搞懂三个概念</h2>
+<h3>1.1 镜像 vs 容器</h3>
+<p><strong>镜像（image）</strong> 像&quot;安装包/模板&quot;，是一份只读的文件系统快照；<strong>容器（container）</strong> 是镜像跑起来的实例，一个镜像可以启动多个容器。</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> images   <span class="tok-com"># 看本机有哪些镜像（模板）</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">ps</span>       <span class="tok-com"># 看哪些容器在运行（实例）</span></span></span>
+</code></pre>
+</div>
+<p>日常操作的对象是容器，容器从镜像启动，但两者要分清楚：删容器不等于删镜像，删了镜像以后还能再 pull 回来。</p>
+<h3>1.2 容器是临时的</h3>
+<p>容器里装的包、改的配置、写的文件，容器一删就没了。真正要保留的数据（数据库文件、上传文件、日志）必须放到<strong>数据卷（volume）</strong>或挂载宿主机目录，否则删容器等于删数据。</p>
+<p>这也是为什么生产环境一般用 docker-compose 而不是裸 <code>docker run</code>：compose 文件把端口、挂载、环境变量、重启策略都写清楚，整套配置可复制、可回滚。</p>
+<h3>1.3 端口映射和数据卷</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># -p 8080:80 把容器内 80 端口映射到宿主机 8080</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">-d</span> <span class="tok-fn">--name</span> web <span class="tok-fn">-p</span> 8080:80 <span class="tok-kw">nginx</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  4</span><span class="code"><span class="tok-com"># -v 挂载：宿主机目录 /data 对应容器内 /app/data</span></span></span>
+<span class="line"><span class="ln">  5</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">-d</span> <span class="tok-fn">--name</span> app <span class="tok-fn">-v</span> /data:/app/data myapp</span></span>
+</code></pre>
+</div>
+<p>注意：容器内访问不到宿主机端口，访问宿主服务要写宿主机 IP；容器之间靠容器名互相访问。</p>
+<hr class="md-sep">
+<h2>2. 日常必会命令</h2>
+<h3>2.1 看容器和镜像</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">ps</span>                <span class="tok-com"># 运行中的容器</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">ps</span> <span class="tok-fn">-a</span>             <span class="tok-com"># 所有容器（含已停止的）</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">docker</span> images            <span class="tok-com"># 本机所有镜像</span></span></span>
+</code></pre>
+</div>
+<p><code>docker ps -a</code> 的输出里，<code>NAMES</code> 列就是容器名，后面的命令都可以用它代替容器 ID。</p>
+<h3>2.2 启动 / 停止 / 重启</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> start &lt;容器名&gt;     <span class="tok-com"># 启动已停止的容器</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> stop &lt;容器名&gt;      <span class="tok-com"># 停止</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">docker</span> restart &lt;容器名&gt;   <span class="tok-com"># 重启</span></span></span>
+</code></pre>
+</div>
+<h3>2.3 进容器</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">exec</span> <span class="tok-fn">-it</span> &lt;容器名&gt; <span class="tok-kw">bash</span>   <span class="tok-com"># 常见方式</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">exec</span> <span class="tok-fn">-it</span> &lt;容器名&gt; <span class="tok-kw">sh</span>     <span class="tok-com"># 精简镜像没有 bash 时用 sh</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">exec</span> <span class="tok-fn">-it</span> <span class="tok-fn">-u</span> root &lt;容器名&gt; <span class="tok-kw">bash</span>   <span class="tok-com"># 指定 root 身份进入</span></span></span>
+</code></pre>
+</div>
+<p>要点：</p>
+<ul>
+<li><code>exec</code> 只能进<strong>运行中</strong>的容器，容器没跑先 <code>docker start</code>。</li>
+<li><code>-i</code> 保持交互，<code>-t</code> 分配终端，两个都要带，否则敲命令没反应。</li>
+<li>进入后不一定有 root 权限，达梦容器通常还要 <code>su - dmdba</code>。</li>
+</ul>
+<h3>2.4 看日志</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> logs &lt;容器名&gt;              <span class="tok-com"># 最近日志</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> logs <span class="tok-fn">-f</span> &lt;容器名&gt;           <span class="tok-com"># 实时跟踪，Ctrl+C 退出</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">docker</span> logs <span class="tok-fn">--tail</span> 100 &lt;容器名&gt;   <span class="tok-com"># 只看最后 100 行</span></span></span>
+</code></pre>
+</div>
+<p>容器启动失败、数据库连不上，第一件事就是看日志。</p>
+<h3>2.5 看容器详情（最实用）</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> inspect &lt;容器名&gt;                                  <span class="tok-com"># 全部信息</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> inspect &lt;容器名&gt; <span class="tok-fn">--format</span> <span class="tok-str">&#x27;{{json .Config.Env}}&#x27;</span>   <span class="tok-com"># 只看环境变量</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">docker</span> inspect &lt;容器名&gt; <span class="tok-fn">--format</span> <span class="tok-str">&#x27;{{json .Mounts}}&#x27;</span>       <span class="tok-com"># 只看数据卷挂载</span></span></span>
+<span class="line"><span class="ln">  4</span><span class="code"><span class="tok-kw">docker</span> top &lt;容器名&gt;                                       <span class="tok-com"># 容器内的进程</span></span></span>
+<span class="line"><span class="ln">  5</span><span class="code"><span class="tok-kw">docker</span> stats                                              <span class="tok-com"># 实时 CPU/内存</span></span></span>
+</code></pre>
+</div>
+<p>排查&quot;数据库在哪&quot;时，<code>Config.Env</code> 和 <code>Mounts</code> 是最有用的两个字段：数据库地址、账号密码、数据目录常常就藏在这里。</p>
+<h3>2.6 删除容器和镜像</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">rm</span> &lt;容器名&gt;    <span class="tok-com"># 删容器（需先停止）</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> rmi &lt;镜像名&gt;   <span class="tok-com"># 删镜像</span></span></span>
+</code></pre>
+</div>
+<h3>2.7 命令速查表</h3>
+          <div class="table-block"><table>
+          <thead>
+          <tr>
+          <th>场景</th>
+          <th>命令</th>
+          <th>说明</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+          <td>看运行中的容器</td>
+          <td><code>docker ps</code></td>
+          <td>最常用</td>
+          </tr>
+          <tr>
+          <td>看所有容器</td>
+          <td><code>docker ps -a</code></td>
+          <td>含已停止</td>
+          </tr>
+          <tr>
+          <td>看镜像</td>
+          <td><code>docker images</code></td>
+          <td>本机模板列表</td>
+          </tr>
+          <tr>
+          <td>进容器</td>
+          <td><code>docker exec -it 名字 bash</code></td>
+          <td>无 bash 换 sh</td>
+          </tr>
+          <tr>
+          <td>看日志</td>
+          <td><code>docker logs -f 名字</code></td>
+          <td>-f 实时跟踪</td>
+          </tr>
+          <tr>
+          <td>看环境变量</td>
+          <td><code>docker inspect 名字 --format &#x27;{{json .Config.Env}}&#x27;</code></td>
+          <td>找配置首选</td>
+          </tr>
+          <tr>
+          <td>看挂载</td>
+          <td><code>docker inspect 名字 --format &#x27;{{json .Mounts}}&#x27;</code></td>
+          <td>找数据目录</td>
+          </tr>
+          <tr>
+          <td>启动/停止/重启</td>
+          <td><code>docker start/stop/restart 名字</code></td>
+          <td>对容器操作</td>
+          </tr>
+          <tr>
+          <td>删容器</td>
+          <td><code>docker rm 名字</code></td>
+          <td>先 stop</td>
+          </tr>
+          <tr>
+          <td>删镜像</td>
+          <td><code>docker rmi 镜像名</code></td>
+          <td>镜像不是容器</td>
+          </tr>
+          </tbody>
+          </table>
+          </div>
+<hr class="md-sep">
+<h2>3. 进容器后怎么找东西</h2>
+<p>进去先确认自己在哪、有什么：</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">pwd</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">ls</span> <span class="tok-fn">-la</span></span></span>
+</code></pre>
+</div>
+<p>然后找配置文件——应用代码一般在 <code>/app</code>、<code>/opt</code>、<code>/usr/src/app</code> 之类的位置：</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 全盘找配置类文件</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">find</span> / <span class="tok-fn">-maxdepth</span> 4 \( <span class="tok-fn">-name</span> <span class="tok-str">&quot;appsettings*.json&quot;</span> <span class="tok-fn">-o</span> <span class="tok-fn">-name</span> <span class="tok-str">&quot;*.yml&quot;</span> <span class="tok-fn">-o</span> <span class="tok-fn">-name</span> <span class="tok-str">&quot;*.yaml&quot;</span> <span class="tok-fn">-o</span> <span class="tok-fn">-name</span> <span class="tok-str">&quot;.env&quot;</span> \) 2&gt;/dev/null</span></span>
+<span class="line"><span class="ln">  3</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  4</span><span class="code"><span class="tok-com"># 找到目录后直接搜数据库连接关键字</span></span></span>
+<span class="line"><span class="ln">  5</span><span class="code"><span class="tok-kw">grep</span> <span class="tok-fn">-rniE</span> <span class="tok-str">&quot;jdbc:dm|dameng|dm8|5236|ConnectionString|DataSource&quot;</span> /app 2&gt;/dev/null</span></span>
+</code></pre>
+</div>
+<p>数据库连接串通常长这样：<code>jdbc:dm://IP:5236</code>，看到 <code>IP:5236</code> 就知道数据库在哪台机器。</p>
+<hr class="md-sep">
+<h2>4. 排查&quot;数据库到底在哪&quot;的通用思路</h2>
+<p>不管什么数据库，思路都一样：<strong>应用一定要连数据库，连接信息必然写在配置里</strong>。</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 第 1 步：看应用容器环境变量</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> inspect &lt;应用容器&gt; <span class="tok-fn">--format</span> <span class="tok-str">&#x27;{{json .Config.Env}}&#x27;</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  4</span><span class="code"><span class="tok-com"># 第 2 步：进容器翻配置</span></span></span>
+<span class="line"><span class="ln">  5</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">exec</span> <span class="tok-fn">-it</span> &lt;应用容器&gt; <span class="tok-kw">sh</span></span></span>
+<span class="line"><span class="ln">  6</span><span class="code"><span class="tok-kw">grep</span> <span class="tok-fn">-rniE</span> <span class="tok-str">&quot;jdbc|5236|ConnectionString|DataSource&quot;</span> /app 2&gt;/dev/null</span></span>
+<span class="line"><span class="ln">  7</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  8</span><span class="code"><span class="tok-com"># 第 3 步：宿主机搜配置</span></span></span>
+<span class="line"><span class="ln">  9</span><span class="code"><span class="tok-kw">grep</span> <span class="tok-fn">-rniE</span> <span class="tok-str">&quot;jdbc:dm|dameng|dm8|5236|SYSDBA&quot;</span> /www /opt /root 2&gt;/dev/null | <span class="tok-kw">head</span> -30</span></span>
+<span class="line"><span class="ln"> 10</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln"> 11</span><span class="code"><span class="tok-com"># 第 4 步：有可疑 IP 就试端口</span></span></span>
+<span class="line"><span class="ln"> 12</span><span class="code"><span class="tok-kw">nc</span> <span class="tok-fn">-zv</span> 目标IP 5236</span></span>
+</code></pre>
+</div>
+<p>如果 IP 是内网地址（172.x、192.168.x、10.x），说明数据库在另一台内网服务器，要去那台机器上查。</p>
+<hr class="md-sep">
+<h2>5. 达梦数据库专项排查</h2>
+<p>达梦（DM8）默认端口 <strong>5236</strong>，默认用户 <code>SYSDBA</code>。排查分两层：先看 Docker，再看宿主机。</p>
+<h3>5.1 Docker 里有没有达梦</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 看运行中的容器（docker ps 只显示运行中的）</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">ps</span> <span class="tok-fn">-a</span> | <span class="tok-kw">grep</span> <span class="tok-fn">-iE</span> <span class="tok-str">&quot;dameng|dm8|dmdb&quot;</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  4</span><span class="code"><span class="tok-com"># 看有没有达梦镜像</span></span></span>
+<span class="line"><span class="ln">  5</span><span class="code"><span class="tok-kw">docker</span> images | <span class="tok-kw">grep</span> <span class="tok-fn">-iE</span> <span class="tok-str">&quot;dameng|dm8&quot;</span></span></span>
+</code></pre>
+</div>
+<p>注意：<code>docker ps</code> 只看运行中的容器，有镜像但没容器、有容器但停了，都要用 <code>docker ps -a</code> 才看得到。</p>
+<h3>5.2 有容器：查配置并进容器用 disql</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-com"># 看端口、环境变量、数据卷</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">docker</span> inspect &lt;容器名&gt; | <span class="tok-kw">grep</span> <span class="tok-fn">-iE</span> <span class="tok-str">&quot;5236|Env|Mounts&quot;</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">docker</span> logs &lt;容器名&gt; 2&gt;&amp;1 | <span class="tok-kw">head</span> -50   <span class="tok-com"># 启动日志常带初始账号密码</span></span></span>
+<span class="line"><span class="ln">  4</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  5</span><span class="code"><span class="tok-com"># 进容器</span></span></span>
+<span class="line"><span class="ln">  6</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">exec</span> <span class="tok-fn">-it</span> &lt;容器名&gt; <span class="tok-kw">bash</span></span></span>
+<span class="line"><span class="ln">  7</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  8</span><span class="code"><span class="tok-com"># 找安装目录（常见 /opt/dmdbms 或 /home/dmdba/dmdbms）</span></span></span>
+<span class="line"><span class="ln">  9</span><span class="code"><span class="tok-kw">find</span> / <span class="tok-fn">-name</span> disql 2&gt;/dev/null</span></span>
+<span class="line"><span class="ln"> 10</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln"> 11</span><span class="code"><span class="tok-com"># 切到达梦用户并用 disql 连接</span></span></span>
+<span class="line"><span class="ln"> 12</span><span class="code"><span class="tok-kw">su</span> - dmdba</span></span>
+<span class="line"><span class="ln"> 13</span><span class="code">/opt/dmdbms/bin/disql SYSDBA/SYSDBA@localhost:5236</span></span>
+</code></pre>
+</div>
+<p>连上后的常用查询：</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">sql</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code">-- 看版本</span></span>
+<span class="line"><span class="ln">  2</span><span class="code">SELECT * FROM v$version;</span></span>
+<span class="line"><span class="ln">  3</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  4</span><span class="code">-- 看实例状态</span></span>
+<span class="line"><span class="ln">  5</span><span class="code">SELECT <span class="tok-kw">name</span>, <span class="tok-kw">status</span>$ FROM v$instance;</span></span>
+<span class="line"><span class="ln">  6</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln">  7</span><span class="code">-- 看所有数据库</span></span>
+<span class="line"><span class="ln">  8</span><span class="code">SELECT <span class="tok-kw">name</span> FROM v$database;</span></span>
+<span class="line"><span class="ln">  9</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln"> 10</span><span class="code">-- 看所有用户</span></span>
+<span class="line"><span class="ln"> 11</span><span class="code">SELECT <span class="tok-kw">username</span> FROM dba_users;</span></span>
+<span class="line"><span class="ln"> 12</span><span class="code">&nbsp;</span></span>
+<span class="line"><span class="ln"> 13</span><span class="code">-- 看某用户下的表</span></span>
+<span class="line"><span class="ln"> 14</span><span class="code">SELECT table_name FROM dba_tables WHERE owner=<span class="tok-str">&#x27;SYSDBA&#x27;</span>;</span></span>
+</code></pre>
+</div>
+<p><code>disql</code> 和 Oracle 的 sqlplus 用法类似，是达梦自带的命令行客户端。</p>
+<h3>5.3 宿主机上查达梦（命令清单）</h3>
+          <div class="table-block"><table>
+          <thead>
+          <tr>
+          <th>类别</th>
+          <th>命令</th>
+          <th>说明</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+          <td>进程</td>
+          <td>`ps -ef \</td>
+          <td>grep -iE &quot;dmserver\</td>
+          <td>dmap\</td>
+          <td>dmwatch&quot;`</td>
+          <td>达梦在跑一定有 dmserver</td>
+          </tr>
+          <tr>
+          <td>端口</td>
+          <td>`ss -tlnp \</td>
+          <td>grep 5236`</td>
+          <td>默认端口 5236</td>
+          </tr>
+          <tr>
+          <td>服务</td>
+          <td>`systemctl list-units --all \</td>
+          <td>grep -i dm`</td>
+          <td>看服务有没有注册</td>
+          </tr>
+          <tr>
+          <td>安装目录</td>
+          <td><code>ls -d /opt/dmdbms /home/dmdba/dmdbms</code></td>
+          <td>常见安装位置</td>
+          </tr>
+          <tr>
+          <td>命令行工具</td>
+          <td><code>find / -maxdepth 6 -name disql -o -name dminit</code></td>
+          <td>有工具 = 装过</td>
+          </tr>
+          <tr>
+          <td>安装包</td>
+          <td>`rpm -qa \</td>
+          <td>grep -iE &quot;dameng\</td>
+          <td>dm8&quot;`</td>
+          <td>CentOS 系</td>
+          </tr>
+          <tr>
+          <td>安装包</td>
+          <td>`dpkg -l \</td>
+          <td>grep -iE &quot;dameng\</td>
+          <td>dm8&quot;`</td>
+          <td>Ubuntu/Debian 系</td>
+          </tr>
+          <tr>
+          <td>数据文件</td>
+          <td><code>find / -maxdepth 8 -name dm.ini -o -name dm.ctl</code></td>
+          <td>实例数据目录</td>
+          </tr>
+          <tr>
+          <td>用户</td>
+          <td>`getent passwd \</td>
+          <td>grep -i dmdba`</td>
+          <td>达梦专用用户</td>
+          </tr>
+          <tr>
+          <td>配置关键字</td>
+          <td>`grep -rniE &quot;dameng\</td>
+          <td>dm8\</td>
+          <td>jdbc:dm\</td>
+          <td>5236&quot; /etc /opt /www`</td>
+          <td>全盘搜配置</td>
+          </tr>
+          <tr>
+          <td>日志</td>
+          <td>`ls /var/log/ \</td>
+          <td>grep -i dm`</td>
+          <td>达梦日志目录</td>
+          </tr>
+          </tbody>
+          </table>
+          </div>
+<p>实际排查时先跑两条，基本必中：</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">ss</span> <span class="tok-fn">-tlnp</span> | <span class="tok-kw">grep</span> 5236</span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">ps</span> <span class="tok-fn">-ef</span> | <span class="tok-kw">grep</span> <span class="tok-fn">-iE</span> <span class="tok-str">&quot;dmserver|dmap|dmwatch&quot;</span></span></span>
+</code></pre>
+</div>
+<p>查到进程后，进程命令行一般带安装路径（如 <code>/opt/dmdbms/bin/dmserver</code>），顺着就能找到实例和数据目录。</p>
+<h3>5.4 主机和 Docker 都查不到怎么办</h3>
+<p>说明达梦不在这台机器上，也别慌，按优先级继续：</p>
+<ol>
+<li><strong>看应用连接配置</strong>——应用能跑就一定配了数据库地址，这是最可靠的线索。</li>
+<li><strong>找部署文档和启动脚本</strong>——docker-compose.yml、k8s yaml、运维文档里通常写了数据库主机。</li>
+<li><strong>问部署的人</strong>——一句&quot;达梦在哪台机器&quot;往往比查半天快。</li>
+<li><strong>网络探测</strong>——从能访问内网的机器上 <code>nc -zv 目标IP 5236</code>，能连上就说明数据库在那。</li>
+<li><strong>看应用日志</strong>——数据库连接报错里常带主机名或 IP。</li>
+</ol>
+<hr class="md-sep">
+<h2>6. 主机资源排查</h2>
+<h3>6.1 内存</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">free</span> <span class="tok-fn">-h</span>                    <span class="tok-com"># 总量/已用/可用/Swap</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">ps</span> aux <span class="tok-fn">--sort</span>=-%mem | <span class="tok-kw">head</span> -15   <span class="tok-com"># 内存占用最高的进程</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">docker</span> stats               <span class="tok-com"># 每个容器的实时 CPU/内存</span></span></span>
+</code></pre>
+</div>
+<p>看内存重点看 <code>available</code>（可用）而不是 <code>free</code>（空闲），因为缓存可以回收。Swap 使用偏高说明内存有压力。</p>
+<h3>6.2 存储</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">df</span> <span class="tok-fn">-h</span>                      <span class="tok-com"># 磁盘使用率</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">df</span> <span class="tok-fn">-i</span>                      <span class="tok-com"># inode 使用率（小文件太多会先爆 inode）</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">du</span> <span class="tok-fn">-xsh</span> /www/* /root /var/log 2&gt;/dev/null | sort <span class="tok-fn">-rh</span> | <span class="tok-kw">head</span>   <span class="tok-com"># 找大目录</span></span></span>
+</code></pre>
+</div>
+<h3>6.3 容器日志撑爆磁盘</h3>
+<p>容器日志默认全量写在宿主机 <code>/var/lib/docker/containers/&lt;ID&gt;/*-json.log</code>，跑久了会撑爆磁盘，而且在容器内查不到：</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">system</span> <span class="tok-kw">df</span>                                   <span class="tok-com"># 镜像/容器/卷/日志占用总览</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">du</span> <span class="tok-fn">-sh</span> /var/lib/<span class="tok-kw">docker</span>/containers/*/*<span class="tok-fn">-json</span>.log 2&gt;/dev/null | sort <span class="tok-fn">-rh</span> | <span class="tok-kw">head</span></span></span>
+<span class="line"><span class="ln">  3</span><span class="code"><span class="tok-kw">docker</span> <span class="tok-kw">system</span> prune                                <span class="tok-com"># 清理停止容器和悬空镜像（慎用）</span></span></span>
+</code></pre>
+</div>
+<hr class="md-sep">
+<h2>7. 进阶注意事项</h2>
+<h3>7.1 用 docker-compose 管理</h3>
+<p>多容器项目（比如应用 + Redis + 数据库）推荐 compose：一次 <code>docker compose up -d</code> 拉起整套，配置全部在文件里。</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">yaml</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">version</span>: <span class="tok-str">&quot;3&quot;</span></span></span>
+<span class="line"><span class="ln">  2</span><span class="code"><span class="tok-kw">services</span>:</span></span>
+<span class="line"><span class="ln">  3</span><span class="code">  app:</span></span>
+<span class="line"><span class="ln">  4</span><span class="code">    <span class="tok-kw">image</span>: museum-manager:202611041504</span></span>
+<span class="line"><span class="ln">  5</span><span class="code">    <span class="tok-kw">ports</span>:</span></span>
+<span class="line"><span class="ln">  6</span><span class="code">      - <span class="tok-str">&quot;5000:5000&quot;</span></span></span>
+<span class="line"><span class="ln">  7</span><span class="code">    <span class="tok-kw">environment</span>:</span></span>
+<span class="line"><span class="ln">  8</span><span class="code">      DB_HOST: dm</span></span>
+<span class="line"><span class="ln">  9</span><span class="code">      DB_PORT: <span class="tok-str">&quot;5236&quot;</span></span></span>
+<span class="line"><span class="ln"> 10</span><span class="code">    <span class="tok-kw">volumes</span>:</span></span>
+<span class="line"><span class="ln"> 11</span><span class="code">      - app-data:/app/data</span></span>
+<span class="line"><span class="ln"> 12</span><span class="code">    <span class="tok-kw">restart</span>: always</span></span>
+<span class="line"><span class="ln"> 13</span><span class="code">  redis:</span></span>
+<span class="line"><span class="ln"> 14</span><span class="code">    <span class="tok-kw">image</span>: redis:6.0.9</span></span>
+<span class="line"><span class="ln"> 15</span><span class="code">    <span class="tok-kw">restart</span>: always</span></span>
+<span class="line"><span class="ln"> 16</span><span class="code"><span class="tok-kw">volumes</span>:</span></span>
+<span class="line"><span class="ln"> 17</span><span class="code">  app-data:</span></span>
+</code></pre>
+</div>
+<p>compose 里容器之间靠<strong>服务名</strong>互访，所以数据库地址写成 <code>dm:5236</code> 这种名字而不是 IP，看到别奇怪。</p>
+<h3>7.2 网络要点</h3>
+<ul>
+<li><code>-p 8080:80</code> 是端口映射，容器内访问不到宿主机端口。</li>
+<li>容器之间靠容器名/服务名访问（compose 会自动建内部网络）。</li>
+<li>查连通性用 <code>docker exec -it &lt;容器&gt; sh -c &#x27;nc -zv dm 5236&#x27;</code>。</li>
+</ul>
+<h3>7.3 资源限制与自启动</h3>
+<p>生产容器建议加限制，防止某个容器拖垮整台机器：</p>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">bash</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code"><span class="tok-kw">docker</span> run <span class="tok-fn">-d</span> <span class="tok-fn">--name</span> app <span class="tok-fn">--memory</span> 2g <span class="tok-fn">--cpus</span> 2 <span class="tok-fn">--restart</span> always myapp</span></span>
+</code></pre>
+</div>
+<p><code>--restart always</code> 让容器挂了自动拉起，机器重启后服务也能恢复。</p>
+<h3>7.4 安全习惯</h3>
+<ul>
+<li>密码不要硬编码进镜像或代码，用环境变量注入。</li>
+<li>只暴露需要的端口，不要无脑映射。</li>
+<li>镜像 tag 带日期/版本（如 <code>202611041504</code>），不要只用 <code>latest</code>。</li>
+</ul>
+<h3>7.5 升级与回滚</h3>
+<p>用版本化的镜像 tag，升级就是换 tag 重新起容器；出问题可以立即切回旧 tag，而不是在容器里手改配置。</p>
+<h3>7.6 学习路径建议</h3>
+<div class="code-block">
+<div class="code-header">
+  <div class="dots"><span></span><span></span><span></span></div>
+  <span class="filename">terminal</span>
+  <span class="lang">text</span>
+</div>
+<pre><code>
+<span class="line"><span class="ln">  1</span><span class="code">基础：docker run 常用参数（<span class="tok-fn">-d</span> <span class="tok-fn">-p</span> <span class="tok-fn">-v</span> <span class="tok-fn">-e</span> <span class="tok-fn">--restart</span> <span class="tok-fn">--name</span>）</span></span>
+<span class="line"><span class="ln">  2</span><span class="code">→ compose：写一个多服务项目</span></span>
+<span class="line"><span class="ln">  3</span><span class="code">→ Dockerfile：构建自己的镜像</span></span>
+<span class="line"><span class="ln">  4</span><span class="code">→ 进阶：网络模式（bridge/host）、存储驱动、编排（K8s/Swarm）</span></span>
+</code></pre>
+</div>
+<p>命令不用背，<code>docker 命令 --help</code> 随时查；关键是理解&quot;镜像—容器—数据卷—网络&quot;这四者的关系。</p>
+<hr class="md-sep">
+<h2>8. 排查思路总结</h2>
+<p>一次&quot;找不到数据库&quot;的排查，按这个顺序走：</p>
+<ol>
+<li><code>docker ps -a</code> 看有没有对应容器，有就 <code>inspect</code> + 进容器看配置。</li>
+<li>没有容器，就在宿主机查进程、端口、服务、安装目录。</li>
+<li>都没有，说明数据库在别的机器——回头查<strong>应用连接配置</strong>，地址一定写在某处。</li>
+<li>找到地址后用 <code>nc -zv IP 5236</code> 验证连通性。</li>
+<li>最终定位后，把数据库主机、账号、端口记进文档，避免下次再查一遍。</li>
+</ol>
+<blockquote>
+          <p>排查的本质不是&quot;记住所有命令&quot;，而是知道<strong>线索藏在哪里</strong>：数据库在应用配置里，数据在数据卷里，日志在宿主目录里。</p>
+          </blockquote>
+
+        </div>
+
+        <footer class="article-footer">
+          <div class="tag-row">
+            <a href="#">#Docker</a>
+            <a href="#">#达梦</a>
+            <a href="#">#运维</a>
+            <a href="#">#排查</a>
+          </div>
+          <div class="article-nav">
+            <a href="./hermes-install.html" class="nav-card prev">
+              <div class="label">cd ../previous</div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <a href="./learn-python-beginner.html" class="nav-card next">
+              <div class="label">cd ../next</div>
+              <h4>0 基础学 Python：一份不绕弯的学习路线图（2026 版） →</h4>
+            </a>
+          </div>
+              <h4>← Hermes Agent 全平台安装实战：从一行 curl 到 systemd 常驻</h4>
+            </a>
+            <a href="./learn-python-beginner.html" class="nav-card next">
+              <div class="label">cd ../next</div>
+              <h4>0 基础学 Python：一份不绕弯的学习路线图（2026 版） →</h4>
+            </a>
+          </div>
+              <h4>← 住进山里第十个月：我学到了什么</h4>
+            </a>
+            <a href="./article.html" class="nav-card next">
+              <div class="label next">cd ../next</div>
+              <h4>从 Vim 到 Neovim：一次完整的迁移记录 →</h4>
+            </a>
+          </div>
+        </footer>
+      </article>
+    </div>
+  </main>
+
+  <div class="divider"><span class="hash">#</span><span class="eq">============</span><span class="title">end of file</span><span class="eq">============</span><span class="hash">#</span></div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h4>echo "鹏飞日记"</h4>
+        <p>一封每周三到的邮件，写给想慢下来的人。订阅完全免费，随时可以退订。</p>
+      </div>
+      <div class="footer-col">
+        <h5>navigation</h5>
+        <ul>
+          <li><a href="./index.html">./issue-042</a></li>
+          <li><a href="./archive.html">./archive</a></li>
+          <li><a href="./index.html#rss">./rss</a></li>
+          <li><a href="./index.html#about">./about</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>contact</h5>
+        <ul>
+          <li><a href="./index.html#subscribe">./subscribe</a></li>
+          <li><a href="#">./twitter</a></li>
+          <li><a href="#">./github</a></li>
+          <li><a href="#">./submit</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>// © 2026 鹏飞日记 — built with vim &amp; patience</span>
+      <span>EOF</span>
+    </div>
+  </footer>
+</body>
+</html>

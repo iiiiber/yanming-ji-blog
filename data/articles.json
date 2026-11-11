@@ -12,6 +12,23 @@
     "article_tags": []
   },
   {
+    "slug": "docker-basics-and-troubleshooting",
+    "title": "Docker 从入门到排查：容器基础、达梦定位与日常运维",
+    "date": "2026-11-11",
+    "read": 15,
+    "tag": "tech",
+    "excerpt": "镜像和容器什么关系？怎么进容器、看日志、找数据库连接配置？达梦在 Docker 和主机上分别怎么查？这篇把入门命令和真实排查思路一次写清楚。",
+    "article_tags": [
+      "Docker",
+      "达梦",
+      "运维",
+      "排查"
+    ],
+    "visual": "p1",
+    "top": false,
+    "cover": false
+  },
+  {
     "slug": "learn-python-beginner",
     "title": "0 基础学 Python：一份不绕弯的学习路线图（2026 版）",
     "read": 18,
